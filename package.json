@@ -1,0 +1,12 @@
+{
+  "name": "ifandray-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npm --prefix i-fandray run dev",
+    "dev:all": "npm --prefix i-fandray run dev:all",
+    "build": "npm --prefix i-fandray run build",
+    "start": "npm --prefix i-fandray run start",
+    "test": "npm --prefix i-fandray run test"
+  }
+}

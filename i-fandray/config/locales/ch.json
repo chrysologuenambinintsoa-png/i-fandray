@@ -1,0 +1,131 @@
+{
+  "common": {
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "cancel": "取消",
+    "save": "保存",
+    "delete": "删除",
+    "edit": "编辑",
+    "share": "分享",
+    "like": "点赞",
+    "comment": "评论",
+    "send": "发送",
+    "search": "搜索",
+    "more": "更多",
+    "close": "关闭",
+    "confirm": "确认"
+  },
+  "auth": {
+    "login": "登录",
+    "register": "注册",
+    "logout": "登出",
+    "email": "邮箱",
+    "mobile": "手机号码",
+    "password": "密码",
+    "forgotPassword": "忘记密码？",
+    "loginWith": "使用登录",
+    "or": "或",
+    "noAccount": "没有账户？",
+    "hasAccount": "已有账户？",
+    "signUp": "注册",
+    "signIn": "登录"
+  },
+  "navigation": {
+    "home": "首页",
+    "profile": "个人资料",
+    "messages": "消息",
+    "notifications": "通知",
+    "groups": "群组",
+    "news": "新闻",
+    "live": "直播",
+    "settings": "设置",
+    "friends": "朋友",
+    "actualite": "新闻",
+    "help": "帮助"
+  },
+  "comment": {
+    "reply": "回复",
+    "writeComment": "写评论...",
+    "writeReply": "写回复...",
+    "sendReply": "发送",
+    "viewReplies": "查看",
+    "hideReplies": "隐藏回复"
+  },
+  "post": {
+    "addVideo": "添加视频",
+    "addFeeling": "添加心情",
+    "sharePost": "分享帖子",
+    "comment": "评论",
+    "share": "分享",
+    "like": "点赞",
+    "edit": "编辑",
+    "delete": "删除",
+    "views": "观看",
+    "likes": "点赞",
+    "comments": "评论",
+    "shares": "分享",
+    "feeling": "心情",
+    "location": "位置",
+    "tag": "标签",
+    "posting": "发布中...",
+    "post": "发布",
+    "reacted": "已反应",
+    "moreOptions": "更多选项",
+    "shareToGroup": "分享到群组",
+    "shareToMessage": "通过私信分享",
+    "shareToTimeline": "分享到时间线",
+    "reportPost": "举报帖子"
+  },
+  "groups": {
+    "shareGroup": "分享群组",
+    "shareToGroup": "分享到群组",
+    "shareToMessage": "通过消息分享"
+  },
+  "voice": {
+    "playRecording": "播放录音",
+    "pauseRecording": "暂停录音",
+    "audioWaveform": "音频波形",
+    "deleteRecording": "删除录音"
+  },
+  "search": {
+    "results": "搜索结果"
+  },
+  "reactions": {
+    "like": "点赞",
+    "solidarity": "团结",
+    "love": "爱",
+    "sad": "悲伤",
+    "wow": "哇"
+  },
+  "profile": {
+    "profile": "个人资料",
+    "editProfile": "编辑个人资料",
+    "profilePicture": "头像",
+    "uploadNewProfilePicture": "上传新头像",
+    "changeAvatar": "更改头像",
+    "cover": "封面",
+    "coverPhoto": "封面照片",
+    "uploadNewCoverPhoto": "上传新封面照片",
+    "changeCoverPhoto": "更改封面照片",
+    "firstName": "名",
+    "lastName": "姓",
+    "username": "用户名",
+    "bio": "简介",
+    "location": "位置",
+    "website": "网站",
+    "saveChanges": "保存更改"
+  },
+  "settings": {
+    "account": "账户",
+    "privacy": "隐私",
+    "notifications": "通知",
+    "appearance": "外观",
+    "security": "安全",
+    "about": "关于",
+    "language": "语言",
+    "lightMode": "浅色模式",
+    "darkMode": "深色模式",
+    "settings": "设置"
+  }
+}

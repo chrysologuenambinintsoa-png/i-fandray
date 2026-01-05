@@ -1,0 +1,131 @@
+{
+  "common": {
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "delete": "Supprimer",
+    "edit": "Modifier",
+    "share": "Partager",
+    "like": "J'aime",
+    "comment": "Commenter",
+    "send": "Envoyer",
+    "search": "Rechercher",
+    "more": "Plus",
+    "close": "Fermer",
+    "confirm": "Confirmer"
+  },
+  "auth": {
+    "login": "Connexion",
+    "register": "Inscription",
+    "logout": "Déconnexion",
+    "email": "E-mail",
+    "mobile": "Numéro mobile",
+    "password": "Mot de passe",
+    "forgotPassword": "Mot de passe oublié ?",
+    "loginWith": "Se connecter avec",
+    "or": "ou",
+    "noAccount": "Pas de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "signUp": "S'inscrire",
+    "signIn": "Se connecter"
+  },
+  "navigation": {
+    "home": "Accueil",
+    "profile": "Profil",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "groups": "Groupes",
+    "news": "Actualités",
+    "live": "En direct",
+    "settings": "Paramètres",
+    "friends": "Amis",
+    "actualite": "Actualités",
+    "help": "Aide"
+  },
+  "comment": {
+    "reply": "Répondre",
+    "writeComment": "Écrire un commentaire...",
+    "writeReply": "Écrire une réponse...",
+    "sendReply": "Envoyer",
+    "viewReplies": "Voir",
+    "hideReplies": "Masquer les réponses"
+  },
+  "post": {
+    "addVideo": "Ajouter une vidéo",
+    "addFeeling": "Ajouter une humeur",
+    "sharePost": "Partager le post",
+    "comment": "Commenter",
+    "share": "Partager",
+    "like": "J'aime",
+    "edit": "Modifier",
+    "delete": "Supprimer",
+    "views": "vues",
+    "likes": "J'aime",
+    "comments": "commentaires",
+    "shares": "partages",
+    "feeling": "Humeur",
+    "location": "Lieu",
+    "tag": "Tag",
+    "posting": "Publication...",
+    "post": "Publier",
+    "reacted": "Réagi",
+    "moreOptions": "Plus d'options",
+    "shareToGroup": "Partager dans un groupe",
+    "shareToMessage": "Partager via message privé",
+    "shareToTimeline": "Partager sur le fil d'actualité",
+    "reportPost": "Signaler le post"
+  },
+  "groups": {
+    "shareGroup": "Partager le groupe",
+    "shareToGroup": "Partager dans un groupe",
+    "shareToMessage": "Partager via message"
+  },
+  "voice": {
+    "playRecording": "Lire l'enregistrement",
+    "pauseRecording": "Mettre en pause l'enregistrement",
+    "audioWaveform": "Forme d'onde audio",
+    "deleteRecording": "Supprimer l'enregistrement"
+  },
+  "search": {
+    "results": "Résultats pour"
+  },
+  "reactions": {
+    "like": "J'aime",
+    "solidarity": "Solidarité",
+    "love": "Amour",
+    "sad": "Triste",
+    "wow": "Wow"
+  },
+  "profile": {
+    "profile": "Profil",
+    "editProfile": "Modifier le profil",
+    "profilePicture": "Photo de profil",
+    "uploadNewProfilePicture": "Télécharger une nouvelle photo de profil",
+    "changeAvatar": "Changer l'avatar",
+    "cover": "Couverture",
+    "coverPhoto": "Photo de couverture",
+    "uploadNewCoverPhoto": "Télécharger une nouvelle photo de couverture",
+    "changeCoverPhoto": "Changer la photo de couverture",
+    "firstName": "Prénom",
+    "lastName": "Nom",
+    "username": "Nom d'utilisateur",
+    "bio": "Bio",
+    "location": "Localisation",
+    "website": "Site web",
+    "saveChanges": "Sauvegarder les modifications"
+  },
+  "settings": {
+    "account": "Compte",
+    "privacy": "Confidentialité",
+    "notifications": "Notifications",
+    "appearance": "Apparence",
+    "security": "Sécurité",
+    "about": "À propos",
+    "language": "Langue",
+    "lightMode": "Mode clair",
+    "darkMode": "Mode sombre",
+    "settings": "Paramètres"
+  }
+}

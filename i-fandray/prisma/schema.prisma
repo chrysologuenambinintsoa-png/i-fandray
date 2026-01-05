@@ -1,0 +1,467 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id              String    @id @default(cuid())
+  email           String?   @unique
+  mobile          String?   @unique
+  password        String?
+  firstName       String
+  lastName        String
+  username        String    @unique
+  avatar          String?
+  coverPhoto      String?
+  bio             String?
+  location        String?
+  website         String?
+  dateOfBirth     DateTime?
+  gender          String?
+  isVerified      Boolean   @default(false)
+  isActive        Boolean   @default(true)
+  isOnline        Boolean   @default(false)
+  lastSeen        DateTime?
+  language        String    @default("en")
+  theme           String    @default("light")
+  resetToken      String?
+  resetTokenExpiry DateTime?
+  smsCode         String?
+  smsCodeExpiry   DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  posts           Post[]
+  comments        Comment[]
+  likes           Like[]
+  shares          Share[]
+  stories         Story[]
+  pages           Page[]
+  pageFollowers   PageFollower[]
+  pageAdmins      PageAdmin[]
+  groups          Group[]
+  groupMemberships GroupMember[]
+  friends         Friend[]     @relation("UserFriends")
+  friendOf        Friend[]     @relation("UserFriendOf")
+  sentFriendRequests FriendRequest[] @relation("SentFriendRequests")
+  receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+  notifications   Notification[]
+  sentNotifications Notification[] @relation("NotificationSender")
+  conversationParticipants ConversationParticipant[]
+  sentMessages    Message[]
+  receivedMessages Message[] @relation("MessageReceiver")
+  blockedUsers    Block[]     @relation("UserBlocks")
+  blockedBy       Block[]     @relation("UserBlocked")
+  news            News[]
+  encryptionKeys  EncryptionKey[]
+  ownedSharedKeys SharedKey[] @relation("SharedKeyOwner")
+  receivedSharedKeys SharedKey[] @relation("SharedKeyRecipient")
+  accounts Account[]
+  sessions Session[]
+
+  @@map("User")
+}
+
+model Conversation {
+  id          String   @id @default(cuid())
+  type        String   // 'private' | 'group'
+  name        String?
+  avatar      String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  participants ConversationParticipant[]
+  messages     Message[]
+
+  @@map("Conversation")
+}
+
+model ConversationParticipant {
+  id             String   @id @default(cuid())
+  lastReadAt     DateTime?
+  isMuted        Boolean  @default(false)
+  joinedAt       DateTime @default(now())
+  userId         String
+  conversationId String
+
+  // Relations
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, conversationId])
+  @@map("ConversationParticipant")
+}
+
+model Message {
+  id             String   @id @default(cuid())
+  content        String
+  mediaUrl       String?  // Legacy field
+  mediaType      String?  // Legacy field
+  attachments    Json?    // Array of {url: string, type: string, name?: string}
+
+  // Chiffrement E2EE
+  isEncrypted    Boolean  @default(false)
+  encryptedData  Json?    // {ciphertext: string, iv: string, algorithm: string, keyId?: string}
+  encryptionKeyId String? // ID de la clé utilisée pour le chiffrement
+
+  isRead         Boolean  @default(false)
+  deletedFor     Json?    // Array of user IDs
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  senderId       String
+  receiverId     String?  // For private messages, can be null for group messages
+  conversationId String
+
+  // Relations
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  receiver     User?        @relation("MessageReceiver", fields: [receiverId], references: [id], onDelete: SetNull)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@map("Message")
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  content    String
+  mediaUrls  String[]
+  mediaType  String   // 'text' | 'image' | 'video' | 'mixed'
+  visibility String   // 'public' | 'friends' | 'private'
+  location   String?
+  feeling    String?
+  tags       String[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  authorId   String
+  pageId     String?
+  groupId    String?
+
+  // Relations
+  author   User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  page     Page?     @relation(fields: [pageId], references: [id], onDelete: SetNull)
+  group    Group?    @relation(fields: [groupId], references: [id], onDelete: SetNull)
+  comments Comment[]
+  likes    Like[]
+  shares   Share[]
+
+  @@map("Post")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  authorId  String
+  postId    String
+  parentId  String?
+
+  // Relations
+  author  User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  post    Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  parent  Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+  likes   Like[]
+
+  @@map("Comment")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String?
+  commentId String?
+  storyId   String?
+  emoji     String?
+
+  // Relations
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post    Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  story   Story?   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+  @@unique([userId, commentId])
+  @@unique([userId, storyId])
+  @@map("Like")
+}
+
+model Share {
+  id        String   @id @default(cuid())
+  content   String?
+  createdAt DateTime @default(now())
+  userId    String
+  postId    String
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+
+  @@map("Share")
+}
+
+model Story {
+  id        String   @id @default(cuid())
+  mediaUrl  String
+  mediaType String   // 'image' | 'video'
+  duration  Int?
+  viewers   Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime
+  authorId  String
+
+  // Relations
+  author User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  likes  Like[]
+
+  @@map("Story")
+}
+
+model Page {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  avatar      String?
+  coverPhoto  String?
+  website     String?
+  category    String?
+  isVerified  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ownerId     String
+
+  // Relations
+  owner User  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  posts Post[]
+  followers PageFollower[]
+  admins PageAdmin[]
+
+  @@map("Page")
+}
+
+model PageFollower {
+  id     String @id @default(cuid())
+  userId String
+  pageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pageId])
+  @@map("PageFollower")
+}
+
+model PageAdmin {
+  id     String @id @default(cuid())
+  userId String
+  pageId String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  page Page @relation(fields: [pageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, pageId])
+  @@map("PageAdmin")
+}
+
+model Group {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  avatar      String?
+  coverPhoto  String?
+  category    String?
+  privacy     String   @default("public") // 'public' | 'private'
+  rules       String?
+  memberCount Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  ownerId     String
+
+  // Relations
+  owner    User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members  GroupMember[]
+  posts    Post[]
+
+  @@map("Group")
+}
+
+model GroupMember {
+  id       String   @id @default(cuid())
+  role     String   @default("member") // 'owner' | 'admin' | 'member'
+  joinedAt DateTime @default(now())
+  userId   String
+  groupId  String
+
+  // Relations
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, groupId])
+  @@map("GroupMember")
+}
+
+model Friend {
+  id       String   @id @default(cuid())
+  status   String   @default("pending") // 'pending' | 'accepted' | 'blocked'
+  createdAt DateTime @default(now())
+  userId   String
+  friendId String
+
+  // Relations
+  user   User @relation("UserFriends", fields: [userId], references: [id], onDelete: Cascade)
+  friend User @relation("UserFriendOf", fields: [friendId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, friendId])
+  @@map("Friend")
+}
+
+model FriendRequest {
+  id         String   @id @default(cuid())
+  status     String   @default("pending") // 'pending' | 'accepted' | 'declined'
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  senderId   String
+  receiverId String
+
+  // Relations
+  sender   User @relation("SentFriendRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedFriendRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@unique([senderId, receiverId])
+  @@map("FriendRequest")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  type      String
+  content   String
+  isRead    Boolean  @default(false)
+  data      Json?
+  createdAt DateTime @default(now())
+  userId    String
+  senderId  String?
+
+  // Relations
+  user   User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sender User? @relation("NotificationSender", fields: [senderId], references: [id], onDelete: SetNull)
+
+  @@map("Notification")
+}
+
+model Block {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  blockerId String
+  blockedId String
+
+  // Relations
+  blocker User @relation("UserBlocks", fields: [blockerId], references: [id], onDelete: Cascade)
+  blocked User @relation("UserBlocked", fields: [blockedId], references: [id], onDelete: Cascade)
+
+  @@unique([blockerId, blockedId])
+  @@map("Block")
+}
+
+model News {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  summary     String?
+  imageUrl    String?
+  source      String
+  category    String
+  url         String   @unique
+  publishedAt DateTime
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  authorId    String
+
+  // Relations
+  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("News")
+}
+
+// Clés de chiffrement E2EE
+model EncryptionKey {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  publicKey   String   // Clé publique ECDH exportée en base64
+  keyVersion  Int      @default(1) // Version de la clé pour rotation
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("EncryptionKey")
+}
+
+// Clés partagées entre utilisateurs (pour optimiser les performances)
+model SharedKey {
+  id          String   @id @default(cuid())
+  ownerId     String   // Utilisateur qui a dérivé la clé
+  recipientId String   // Destinataire de la clé
+  keyId       String   // ID de la clé partagée
+  expiresAt   DateTime? // Expiration optionnelle
+  createdAt   DateTime @default(now())
+
+  // Relations
+  owner     User @relation("SharedKeyOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  recipient User @relation("SharedKeyRecipient", fields: [recipientId], references: [id], onDelete: Cascade)
+
+  @@unique([ownerId, recipientId, keyId])
+  @@map("SharedKey")
+}
+
+// NextAuth.js Models
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("Account")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("Session")
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("VerificationToken")
+}

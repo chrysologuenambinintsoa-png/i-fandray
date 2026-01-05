@@ -1,0 +1,131 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "share": "Share",
+    "like": "Like",
+    "comment": "Comment",
+    "send": "Send",
+    "search": "Search",
+    "more": "More",
+    "close": "Close",
+    "confirm": "Confirm"
+  },
+  "auth": {
+    "login": "Login",
+    "register": "Register",
+    "logout": "Logout",
+    "email": "Email",
+    "mobile": "Mobile Number",
+    "password": "Password",
+    "forgotPassword": "Forgot Password?",
+    "loginWith": "Login with",
+    "or": "or",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUp": "Sign Up",
+    "signIn": "Sign In"
+  },
+  "navigation": {
+    "home": "Home",
+    "profile": "Profile",
+    "messages": "Messages",
+    "notifications": "Notifications",
+    "groups": "Groups",
+    "news": "News",
+    "live": "Live",
+    "settings": "Settings",
+    "friends": "Friends",
+    "actualite": "News",
+    "help": "Help"
+  },
+  "comment": {
+    "reply": "Reply",
+    "writeComment": "Write a comment...",
+    "writeReply": "Write a reply...",
+    "sendReply": "Send",
+    "viewReplies": "View",
+    "hideReplies": "Hide replies"
+  },
+  "post": {
+    "addVideo": "Add Video",
+    "addFeeling": "Add Feeling",
+    "sharePost": "Share Post",
+    "comment": "Comment",
+    "share": "Share",
+    "like": "Like",
+    "edit": "Edit",
+    "delete": "Delete",
+    "views": "views",
+    "likes": "likes",
+    "comments": "comments",
+    "shares": "shares",
+    "feeling": "Feeling",
+    "location": "Location",
+    "tag": "Tag",
+    "posting": "Posting...",
+    "post": "Post",
+    "reacted": "Reacted",
+    "moreOptions": "More options",
+    "shareToGroup": "Share to Group",
+    "shareToMessage": "Share via Private Message",
+    "shareToTimeline": "Share to Timeline",
+    "reportPost": "Report Post"
+  },
+  "groups": {
+    "shareGroup": "Share Group",
+    "shareToGroup": "Share to Group",
+    "shareToMessage": "Share via Message"
+  },
+  "voice": {
+    "playRecording": "Play recording",
+    "pauseRecording": "Pause recording",
+    "audioWaveform": "Audio waveform",
+    "deleteRecording": "Delete recording"
+  },
+  "search": {
+    "results": "Results for"
+  },
+  "reactions": {
+    "like": "Like",
+    "solidarity": "Solidarity",
+    "love": "Love",
+    "sad": "Sad",
+    "wow": "Wow"
+  },
+  "profile": {
+    "profile": "Profile",
+    "editProfile": "Edit Profile",
+    "profilePicture": "Profile Picture",
+    "uploadNewProfilePicture": "Upload a new profile picture",
+    "changeAvatar": "Change Avatar",
+    "cover": "Cover",
+    "coverPhoto": "Cover Photo",
+    "uploadNewCoverPhoto": "Upload a new cover photo",
+    "changeCoverPhoto": "Change Cover Photo",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "username": "Username",
+    "bio": "Bio",
+    "location": "Location",
+    "website": "Website",
+    "saveChanges": "Save Changes"
+  },
+  "settings": {
+    "account": "Account",
+    "privacy": "Privacy",
+    "notifications": "Notifications",
+    "appearance": "Appearance",
+    "security": "Security",
+    "about": "About",
+    "language": "Language",
+    "lightMode": "Light Mode",
+    "darkMode": "Dark Mode",
+    "settings": "Settings"
+  }
+}

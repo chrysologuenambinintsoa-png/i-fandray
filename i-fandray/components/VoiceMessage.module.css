@@ -1,0 +1,6 @@
+.waveformBar {
+  width: 0.25rem;
+  background-color: #16a34a;
+  border-radius: 9999px;
+  height: var(--bar-height);
+}
