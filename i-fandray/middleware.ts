@@ -7,7 +7,7 @@ const RATE_LIMIT = 100; // requests per window
 const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
 // Liste des IPs bloquées (à configurer selon vos besoins)
-const BLOCKED_IPS = [
+const BLOCKED_IPS: string[] = [
   // '192.168.1.1', // Exemple d'IP à bloquer
 ];
 
