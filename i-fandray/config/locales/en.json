@@ -39,6 +39,7 @@
     "groups": "Groups",
     "news": "News",
     "live": "Live",
+    "video": "Video",
     "settings": "Settings",
     "friends": "Friends",
     "actualite": "News",
@@ -127,5 +128,12 @@
     "lightMode": "Light Mode",
     "darkMode": "Dark Mode",
     "settings": "Settings"
+  },
+  "splash": {
+    "tagline": "Connect, Share, Discover"
+  },
+  "feed": {
+    "welcome": "Welcome to your Feed",
+    "loginPrompt": "Please log in to see your personalized feed"
   }
 }

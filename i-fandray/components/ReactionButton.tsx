@@ -13,7 +13,7 @@ interface ReactionButtonProps {
   selectedReaction: string | null;
   onReaction: (emoji: string) => void;
   showReactions: boolean;
-  onToggleReactions: () => void;
+  onToggleReactions?: () => void;
 }
 
 export function ReactionButton({
@@ -21,7 +21,6 @@ export function ReactionButton({
   selectedReaction,
   onReaction,
   showReactions,
-  onToggleReactions,
 }: ReactionButtonProps) {
   const [animatingEmoji, setAnimatingEmoji] = useState<string | null>(null);
 

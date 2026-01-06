@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { signIn } from 'next-auth/react';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { useAuth } from '@/hooks/useAuth';
@@ -21,12 +22,13 @@ import {
   ChevronRight,
   Info,
   Camera,
-  Upload,
   Smartphone,
   Key,
   Trash2,
   AlertTriangle,
-  FileText
+  FileText,
+  Link as LinkIcon,
+  Unlink
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { availableLocales, localeNames } from '@/lib/i18n';
@@ -57,6 +59,12 @@ export default function SettingsPageClient() {
     sessionTimeout: '30' // days
   });
 
+  // Connected accounts state
+  const [connectedAccounts, setConnectedAccounts] = useState<Array<{
+    provider: string;
+    providerAccountId: string;
+  }>>([]);
+
   // Profile form state
   const [profileData, setProfileData] = useState({
     firstName: user?.firstName || '',
@@ -82,6 +90,25 @@ export default function SettingsPageClient() {
   // Refs for file inputs
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  // Fetch connected accounts on mount
+  useEffect(() => {
+    const fetchConnectedAccounts = async () => {
+      try {
+        const response = await fetch('/api/users/connected-accounts');
+        if (response.ok) {
+          const data = await response.json();
+          setConnectedAccounts(data.accounts || []);
+        }
+      } catch (error) {
+        console.error('Error fetching connected accounts:', error);
+      }
+    };
+
+    if (user) {
+      fetchConnectedAccounts();
+    }
+  }, [user]);
 
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
@@ -199,7 +226,6 @@ export default function SettingsPageClient() {
         throw new Error(errorData.error || 'Failed to create page');
       }
 
-      const newPage = await response.json();
       setMessage({ type: 'success', text: 'Page created successfully!' });
       
       // Reset form
@@ -251,6 +277,54 @@ export default function SettingsPageClient() {
       setMessage({ type: 'success', text: 'Account updated successfully' });
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to update account' });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle linking OAuth account
+  const handleLinkAccount = async (provider: string) => {
+    setIsLoading(true);
+    try {
+      const result = await signIn(provider, { callbackUrl: '/settings' });
+      if (result?.error) {
+        throw new Error(result.error);
+      }
+      // Refresh connected accounts
+      const response = await fetch('/api/users/connected-accounts');
+      if (response.ok) {
+        const data = await response.json();
+        setConnectedAccounts(data.accounts || []);
+      }
+      setMessage({ type: 'success', text: `${provider} account linked successfully` });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || `Failed to link ${provider} account` });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle unlinking OAuth account
+  const handleUnlinkAccount = async (provider: string) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/users/connected-accounts', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ provider }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to unlink account');
+      }
+
+      // Refresh connected accounts
+      const data = await response.json();
+      setConnectedAccounts(data.accounts || []);
+      setMessage({ type: 'success', text: `${provider} account unlinked successfully` });
+    } catch (error: any) {
+      setMessage({ type: 'error', text: error.message || `Failed to unlink ${provider} account` });
     } finally {
       setIsLoading(false);
     }
@@ -724,6 +798,88 @@ export default function SettingsPageClient() {
                               <span>Change Password</span>
                             </button>
                           </form>
+                        </div>
+
+                        {/* Connected Accounts */}
+                        <div className="bg-muted p-6 rounded-lg">
+                          <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                            <LinkIcon className="w-5 h-5 mr-2" />
+                            Connected Accounts
+                          </h3>
+                          <p className="text-gray-600 mb-4">Connect your social accounts to sign in faster.</p>
+                          <div className="space-y-4">
+                            {/* Google */}
+                            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-bold text-sm">G</span>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-gray-900">Google</div>
+                                  <div className="text-sm text-gray-600">
+                                    {connectedAccounts.some(acc => acc.provider === 'google')
+                                      ? 'Connected'
+                                      : 'Not connected'}
+                                  </div>
+                                </div>
+                              </div>
+                              {connectedAccounts.some(acc => acc.provider === 'google') ? (
+                                <button
+                                  onClick={() => handleUnlinkAccount('google')}
+                                  disabled={isLoading}
+                                  className="text-red-600 hover:text-red-800 disabled:text-gray-400 flex items-center space-x-2"
+                                >
+                                  <Unlink className="w-4 h-4" />
+                                  <span>Unlink</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleLinkAccount('google')}
+                                  disabled={isLoading}
+                                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                                >
+                                  <LinkIcon className="w-4 h-4" />
+                                  <span>Connect</span>
+                                </button>
+                              )}
+                            </div>
+
+                            {/* Facebook */}
+                            <div className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                              <div className="flex items-center space-x-3">
+                                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                  <span className="text-white font-bold text-sm">F</span>
+                                </div>
+                                <div>
+                                  <div className="font-medium text-gray-900">Facebook</div>
+                                  <div className="text-sm text-gray-600">
+                                    {connectedAccounts.some(acc => acc.provider === 'facebook')
+                                      ? 'Connected'
+                                      : 'Not connected'}
+                                  </div>
+                                </div>
+                              </div>
+                              {connectedAccounts.some(acc => acc.provider === 'facebook') ? (
+                                <button
+                                  onClick={() => handleUnlinkAccount('facebook')}
+                                  disabled={isLoading}
+                                  className="text-red-600 hover:text-red-800 disabled:text-gray-400 flex items-center space-x-2"
+                                >
+                                  <Unlink className="w-4 h-4" />
+                                  <span>Unlink</span>
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleLinkAccount('facebook')}
+                                  disabled={isLoading}
+                                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
+                                >
+                                  <LinkIcon className="w-4 h-4" />
+                                  <span>Connect</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
                         </div>
 
                         {/* Danger Zone */}
@@ -1222,13 +1378,13 @@ export default function SettingsPageClient() {
 
                       <div className="space-y-6">
                         <div className="p-4 bg-muted border border-border rounded-lg">
-                          <h3 className="text-lg font-semibold text-foreground mb-2">About i-Fandray</h3>
+                          <h3 className="text-lg font-semibold text-foreground mb-2">About i-fandray</h3>
                           <p className="text-muted-foreground mb-4">
-                            i-Fandray is a modern social networking platform designed to connect people and share moments.
+                            i-fandray is a modern social networking platform designed to connect people and share moments.
                           </p>
                           <div className="text-sm text-muted-foreground">
                             <p>Version: 1.0.0</p>
-                            <p>© 2024 i-Fandray. All rights reserved.</p>
+                            <p>© 2025 i-fandray. All rights reserved.</p>
                           </div>
                         </div>
                       </div>

@@ -16,19 +16,17 @@ import { useTranslation } from '@/components/TranslationProvider';
 import toast from 'react-hot-toast';
 
 // Lazy load heavy components
-const AIContentRecommender = lazy(() => import('@/components/AIContentRecommender').then(mod => ({ default: mod.AIContentRecommender })));
 const FriendSuggestionsCard = lazy(() => import('@/components/FriendSuggestionsCard').then(mod => ({ default: mod.FriendSuggestionsCard })));
 const SuggestionsCard = lazy(() => import('@/components/SuggestionsCard').then(mod => ({ default: mod.SuggestionsCard })));
 const DiscoverPagesCard = lazy(() => import('@/components/DiscoverPagesCard').then(mod => ({ default: mod.DiscoverPagesCard })));
 const DiscoverGroupsCard = lazy(() => import('@/components/DiscoverGroupsCard').then(mod => ({ default: mod.DiscoverGroupsCard })));
 
 export default function FeedPage() {
-  const { user } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [stories, setStories] = useState<Story[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [showCreateStoryModal, setShowCreateStoryModal] = useState(false);
   const [storyUploadFile, setStoryUploadFile] = useState<File | null>(null);
@@ -113,8 +111,17 @@ export default function FeedPage() {
     }
   };
 
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!authLoading && user === null) { // Only redirect if not loading and explicitly not authenticated
+      console.log('User not authenticated, redirecting to login');
+      router.push('/auth/login');
+    }
+  }, [user, authLoading, router]);
+
   useEffect(() => {
     if (user) {
+      console.log('User authenticated, fetching posts and stories');
       fetchPosts();
       fetchStories();
     }
@@ -134,7 +141,6 @@ const handlePost = (newPost: Post) => {
       const currentEmoji = isLiked ? post.likes?.[0]?.emoji : null;
 
       let method: string;
-      let shouldUpdate = true;
 
       if (emoji) {
         if (isLiked && currentEmoji === emoji) {
@@ -374,11 +380,6 @@ const handlePost = (newPost: Post) => {
 
             {/* Welcome Tips for New Users */}
             <WelcomeTips />
-
-            {/* AI Content Recommender */}
-            <Suspense fallback={<div className="flex items-center justify-center py-8"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div></div>}>
-              <AIContentRecommender />
-            </Suspense>
 
             {/* Posts Feed */}
             <div className="space-y-6">

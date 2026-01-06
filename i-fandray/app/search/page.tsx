@@ -6,7 +6,7 @@ import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { User, Post } from '@/types';
 import { useTranslation } from '@/components/TranslationProvider';
-import { Search, Users, FileText, Hash } from 'lucide-react';
+import { Users, FileText, Hash } from 'lucide-react';
 
 interface SearchResult {
   users: User[];

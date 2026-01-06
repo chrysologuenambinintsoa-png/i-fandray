@@ -8,6 +8,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { Conversation, Message } from '@/types';
 import { EncryptedMessageDisplay } from '@/components/EncryptedMessageDisplay';
 import { EncryptedMessageInput } from '@/components/EncryptedMessageInput';
+import { Search, MessageCircle, Phone, Video } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function MessagesPage() {
   const { user } = useAuth();
@@ -15,7 +17,6 @@ export default function MessagesPage() {
   const [selectedConversation, setSelectedConversation] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [showDeleteOptions, setShowDeleteOptions] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
@@ -35,21 +36,6 @@ export default function MessagesPage() {
       toast.error('Failed to load conversations');
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const fetchMessages = async (conversationId: string) => {
-    try {
-      const response = await fetch(`/api/conversations/${conversationId}/messages`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch messages');
-      }
-
-      const data = await response.json();
-      setMessages(data.messages);
-    } catch (error) {
-      console.error('Error fetching messages:', error);
-      toast.error('Failed to load messages');
     }
   };
 
@@ -360,7 +346,7 @@ export default function MessagesPage() {
                       {selectedConversation && (
                         <EncryptedMessageInput
                           conversationId={selectedConversation.id}
-                          recipientId={selectedConversation.participants.find(p => p.id !== user.id)?.id || ''}
+                          recipientId={selectedConversation?.participants?.find(p => p.id !== user.id)?.id ?? ''}
                           onMessageSent={(message) => {
                             setMessages(prev => [...prev, message]);
                           }}

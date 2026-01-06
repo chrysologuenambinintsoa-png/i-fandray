@@ -40,6 +40,7 @@
     "groups": "Grupos",
     "news": "Noticias",
     "live": "En vivo",
+    "video": "Video",
     "help": "Ayuda",
     "settings": "Configuración"
   },
@@ -133,5 +134,12 @@
     "lightMode": "Modo claro",
     "darkMode": "Modo oscuro",
     "settings": "Configuración"
+  },
+  "splash": {
+    "tagline": "Conecta, Comparte, Descubre"
+  },
+  "feed": {
+    "welcome": "Bienvenido a tu Feed",
+    "loginPrompt": "Por favor inicia sesión para ver tu feed personalizado"
   }
 }

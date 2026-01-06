@@ -1,0 +1,87 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap');
+
+:root {
+  /* Personal modern palette */
+  --primary: 262 72% 58%; /* purple */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 210 100% 50%; /* blue */
+  --secondary-foreground: 0 0% 100%;
+  --accent: 330 80% 60%; /* pink */
+  --background: 210 40% 98%;
+  --card: 0 0% 100%;
+  --card-foreground: 220 15% 15%;
+  --muted: 210 16% 96%;
+  --border: 220 14% 92%;
+  --ring: 262 72% 58%;
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --shadow-soft: 0 6px 18px rgba(16,24,40,0.06);
+  --shadow-elev: 0 12px 40px rgba(16,24,40,0.12);
+}
+
+.dark {
+  --background: 230 18% 10%;
+  --card: 230 18% 12%;
+  --card-foreground: 210 40% 96%;
+  --muted: 230 16% 12%;
+  --border: 230 16% 18%;
+}
+
+html, body {
+  height: 100%;
+  font-family: Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+  background-color: hsl(var(--background));
+  color: hsl(var(--card-foreground));
+}
+
+/* Header glass appearance */
+.header-glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(255,255,255,0.6));
+  -webkit-backdrop-filter: blur(8px) saturate(120%);
+  backdrop-filter: blur(8px) saturate(120%);
+  border-bottom: 1px solid rgba(0,0,0,0.04);
+}
+
+/* Reusable glass class */
+.glass {
+  background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  backdrop-filter: blur(6px) saturate(110%);
+}
+
+.card {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn-personal {
+  background: linear-gradient(90deg, hsl(var(--primary) / 1), hsl(var(--accent) / 1));
+  color: white;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  box-shadow: var(--shadow-elev);
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+
+.btn-personal:hover { transform: translateY(-2px); }
+
+/* Utility for smoother rounded thumbnails */
+.img-rounded { border-radius: calc(var(--radius-md) - 4px); }
+
+/* Make inputs blend with theme */
+.input-themed {
+  background: hsl(var(--card));
+  color: hsl(var(--card-foreground));
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-sm);
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}

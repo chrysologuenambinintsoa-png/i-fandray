@@ -22,7 +22,7 @@ export interface SharedKey {
 
 // Stockage des clés en mémoire (non persisté pour la sécurité)
 let userKeyPair: KeyPair | null = null;
-let sharedKeys: Map<string, SharedKey> = new Map();
+const sharedKeys: Map<string, SharedKey> = new Map();
 let masterKey: CryptoKey | null = null;
 
 /**
@@ -207,7 +207,7 @@ export async function encryptMessageForRecipient(message: string, recipientId: s
     throw new Error('Paire de clés utilisateur non initialisée');
   }
 
-  let sharedKey = getSharedKey(recipientId);
+  const sharedKey = getSharedKey(recipientId);
   if (!sharedKey) {
     throw new Error('Clé partagée non trouvée pour ce destinataire');
   }

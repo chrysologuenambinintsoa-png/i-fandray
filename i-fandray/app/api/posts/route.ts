@@ -5,17 +5,25 @@ import { authOptions } from '@/lib/auth';
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get('page') ?? '1');
     const limit = parseInt(searchParams.get('limit') ?? '10');
+    const authorId = searchParams.get('authorId');
     const skip = (page - 1) * limit;
 
+    // Try to get session for authenticated features, but don't require it
+    const session = await getServerSession(authOptions);
+    const currentUserId = session?.user?.id;
+
+    const whereClause: any = {};
+
+    // If authorId is provided, filter by author
+    if (authorId) {
+      whereClause.authorId = authorId;
+    }
+
     const posts = await prisma.post.findMany({
+      where: whereClause,
       skip,
       take: limit,
       orderBy: { createdAt: 'desc' },
@@ -37,10 +45,10 @@ export async function GET(request: NextRequest) {
             shares: true,
           },
         },
-        likes: {
-          where: { userId: session.user.id },
+        likes: currentUserId ? {
+          where: { userId: currentUserId },
           select: { id: true, emoji: true },
-        },
+        } : false,
       },
     });
 

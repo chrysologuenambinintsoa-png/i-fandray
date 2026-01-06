@@ -39,6 +39,7 @@
     "groups": "群组",
     "news": "新闻",
     "live": "直播",
+    "video": "视频",
     "settings": "设置",
     "friends": "朋友",
     "actualite": "新闻",
@@ -127,5 +128,12 @@
     "lightMode": "浅色模式",
     "darkMode": "深色模式",
     "settings": "设置"
+  },
+  "splash": {
+    "tagline": "连接、分享、发现"
+  },
+  "feed": {
+    "welcome": "欢迎来到您的信息流",
+    "loginPrompt": "请登录以查看您的个性化信息流"
   }
 }

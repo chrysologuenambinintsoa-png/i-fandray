@@ -15,8 +15,8 @@ export async function GET(
 
     const conversationId = params.id;
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '50');
+    const page = parseInt(searchParams.get('page') ?? '1');
+    const limit = parseInt(searchParams.get('limit') ?? '50');
     const skip = (page - 1) * limit;
 
     // Check if user is participant in conversation

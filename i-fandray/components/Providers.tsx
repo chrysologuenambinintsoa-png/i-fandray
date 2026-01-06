@@ -1,9 +1,9 @@
 'use client';
 
+import React, { useEffect } from 'react';
 import { SessionProvider } from 'next-auth/react';
 import { Toaster } from 'react-hot-toast';
 import { useSettings } from '@/hooks/useSettings';
-import { useEffect } from 'react';
 import { TranslationProvider } from './TranslationProvider';
 
 function ThemeProvider({ children }: { children: React.ReactNode }) {

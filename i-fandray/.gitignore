@@ -11,14 +11,14 @@ out/
 .cache/
 .parcel-cache/
 
-# Fichiers d'environnement (NE JAMAIS POUSSER)
+# Fichiers d'environnement 
 .env
 .env.local
 .env.*.local
 .env*
 .env.production
 .env.staging
-!.env.example   # garde uniquement l'exemple
+.env.example   
 
 # Logs et débogage
 *.log

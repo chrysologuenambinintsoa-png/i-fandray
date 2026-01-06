@@ -18,7 +18,9 @@ async function checkDatabaseState() {
     messages: await prisma.message.count(),
     conversations: await prisma.conversation.count(),
     groups: await prisma.group.count(),
-    news: await prisma.news.count(),
+    videos: await prisma.video.count(),
+    videoLikes: await prisma.videoLike.count(),
+    videoComments: await prisma.videoComment.count(),
     blocks: await prisma.block.count(),
   };
 
@@ -43,17 +45,19 @@ async function checkDatabaseState() {
     console.log(`   - ${user.username} (${user.email}) - ${user.isVerified ? '✅ Vérifié' : '❌ Non vérifié'}`);
   });
 
-  console.log('\n📰 Articles d\'actualité :');
-  const news = await prisma.news.findMany({
+  console.log('\n🎥 Vidéos :');
+  const videos = await prisma.video.findMany({
     select: {
       title: true,
       category: true,
-      publishedAt: true,
+      createdAt: true,
+      views: true,
+      likes: true,
     },
   });
 
-  news.forEach(article => {
-    console.log(`   - "${article.title}" [${article.category}] - ${article.publishedAt.toLocaleDateString()}`);
+  videos.forEach(video => {
+    console.log(`   - "${video.title}" [${video.category}] - ${video.views} vues, ${video.likes} likes - ${video.createdAt.toLocaleDateString()}`);
   });
 
   // Vérifications de sécurité

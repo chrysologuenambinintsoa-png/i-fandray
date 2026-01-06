@@ -1,5 +1,13 @@
 /** @type {import('next').NextConfig} */
+const webpack = require('webpack');
+
+// Polyfill pour self dans l'environnement Node.js
+if (typeof self === 'undefined') {
+  global.self = global;
+}
+
 const nextConfig = {
+  // Sécurité - Headers de sécurité
   // Sécurité - Headers de sécurité
   async headers() {
     return [
@@ -72,6 +80,13 @@ const nextConfig = {
 
   // Webpack - Configuration de sécurité
   webpack: (config, { dev, isServer }) => {
+    // Polyfill pour self dans le bundle webpack
+    config.plugins.push(
+      new webpack.DefinePlugin({
+        self: 'globalThis',
+      })
+    );
+
     // Désactiver les source maps en production
     if (!dev && !isServer) {
       config.devtool = false;

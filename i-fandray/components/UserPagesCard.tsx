@@ -25,7 +25,6 @@ interface UserPagesCardProps {
 }
 
 export function UserPagesCard({ onClose }: UserPagesCardProps) {
-  const { user } = useAuth();
   const [pages, setPages] = useState<Page[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

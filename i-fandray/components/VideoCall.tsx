@@ -2,11 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { 
-  Phone, 
   PhoneOff, 
   Mic, 
   MicOff, 
-  Video, 
   VideoOff, 
   Monitor, 
   MonitorOff,
@@ -15,7 +13,8 @@ import {
   Maximize2,
   Minimize2,
   Volume2,
-  VolumeX
+  VolumeX,
+  Video
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from '@/components/TranslationProvider';

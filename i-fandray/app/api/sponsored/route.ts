@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,7 +10,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, content, image, externalUrl, placement, sponsorName, campaignStart, campaignEnd } = body;
+    const { title, content, externalUrl, placement, sponsorName, campaignStart, campaignEnd } = body;
 
     if (!title || !content || !externalUrl || !placement || !sponsorName || !campaignStart || !campaignEnd) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });

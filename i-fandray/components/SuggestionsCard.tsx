@@ -40,7 +40,6 @@ interface SuggestionsData {
 
 export function SuggestionsCard() {
   const { user } = useAuth();
-  const { t } = useTranslation();
   const [suggestions, setSuggestions] = useState<SuggestionsData>({ pages: [], groups: [] });
   const [loading, setLoading] = useState(true);
   const [followingPages, setFollowingPages] = useState<Set<string>>(new Set());

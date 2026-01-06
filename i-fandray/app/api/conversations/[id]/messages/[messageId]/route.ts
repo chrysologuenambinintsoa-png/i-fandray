@@ -16,7 +16,7 @@ export async function DELETE(
     const conversationId = params.id;
     const messageId = params.messageId;
     const { searchParams } = new URL(request.url);
-    const deleteType = searchParams.get('type') || 'for-me'; // 'for-me' or 'for-everyone'
+    const deleteType = searchParams.get('type') ?? 'for-me'; // 'for-me' or 'for-everyone'
 
     // Check if user is participant in conversation
     const participant = await prisma.conversationParticipant.findUnique({

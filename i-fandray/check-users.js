@@ -6,15 +6,14 @@ async function checkUsers() {
   try {
     const users = await prisma.user.findMany();
     console.log('Users in database:', users.length);
-    if (users.length > 0) {
-      console.log('First user:', {
-        id: users[0].id,
-        email: users[0].email,
-        username: users[0].username,
-        hasPassword: !!users[0].password
-      });
-    } else {
-      console.log('No users found. Creating a test user...');
+    users.forEach((user, index) => {
+      console.log(`${index + 1}. ${user.email} (${user.firstName} ${user.lastName}) - Has password: ${!!user.password}`);
+    });
+
+    // Check if there's at least one user with password
+    const usersWithPassword = users.filter(user => user.password);
+    if (usersWithPassword.length === 0) {
+      console.log('No users with passwords found. Creating a test user with password...');
 
       const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -28,11 +27,12 @@ async function checkUsers() {
         }
       });
 
-      console.log('Test user created:', {
-        id: testUser.id,
-        email: testUser.email,
-        username: testUser.username
-      });
+      console.log('✅ Test user created successfully!');
+      console.log('Email: test@example.com');
+      console.log('Password: password123');
+      console.log('You can now login with these credentials.');
+    } else {
+      console.log('✅ Users with passwords exist. You can login with credentials.');
     }
   } catch (error) {
     console.error('Error:', error);

@@ -24,10 +24,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid file type' }, { status: 400 });
     }
 
-    // Validate file size (10MB limit)
-    const maxSize = 10 * 1024 * 1024; // 10MB
+    // Validate file size (100MB limit for videos, 10MB for others)
+    const isVideo = file.type.startsWith('video/');
+    const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024; // 100MB for videos, 10MB for others
     if (file.size > maxSize) {
-      return NextResponse.json({ error: 'File too large' }, { status: 400 });
+      return NextResponse.json({ error: `File too large. Max size: ${isVideo ? '100MB' : '10MB'}` }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -49,9 +50,16 @@ export async function POST(request: NextRequest) {
 
     // Return file URL
     const fileUrl = `/uploads/${filename}`;
+    let thumbnailUrl = fileUrl; // Default to video URL
+
+    // For videos, use a placeholder thumbnail
+    if (file.type.startsWith('video/')) {
+      thumbnailUrl = '/images/video-placeholder.svg';
+    }
 
     return NextResponse.json({
       url: fileUrl,
+      thumbnailUrl,
       type: file.type.startsWith('image/') ? 'image' : file.type.startsWith('video/') ? 'video' : 'audio',
     });
   } catch (error) {

@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { PostCard } from '@/components/PostCard';
-import { Edit, MapPin, Calendar, Mail, Link as LinkIcon, Camera, Loader2 } from 'lucide-react';
+import { Edit, MapPin, Calendar, Link as LinkIcon, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Post } from '@/types';
 
@@ -16,7 +16,6 @@ export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [activeTab, setActiveTab] = useState<'posts' | 'photos' | 'videos'>('posts');
-  const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

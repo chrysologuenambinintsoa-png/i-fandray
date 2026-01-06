@@ -36,7 +36,7 @@ interface FriendRequest {
 }
 
 export default function FriendsPage() {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'friends' | 'requests' | 'sent' | 'suggestions'>('friends');
   const [friends, setFriends] = useState<Friend[]>([]);

@@ -39,6 +39,7 @@
     "groups": "Groupes",
     "news": "Actualités",
     "live": "En direct",
+    "video": "Vidéo",
     "settings": "Paramètres",
     "friends": "Amis",
     "actualite": "Actualités",
@@ -127,5 +128,12 @@
     "lightMode": "Mode clair",
     "darkMode": "Mode sombre",
     "settings": "Paramètres"
+  },
+  "splash": {
+    "tagline": "Connectez-vous, Partagez, Découvrez"
+  },
+  "feed": {
+    "welcome": "Bienvenue sur votre fil d'actualité",
+    "loginPrompt": "Veuillez vous connecter pour voir votre fil personnalisé"
   }
 }

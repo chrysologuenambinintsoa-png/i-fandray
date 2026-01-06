@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
-import { Image, Video, Smile, MapPin, Tag, X, Upload, AlertCircle } from 'lucide-react';
+import { Smile, MapPin, Tag, X, AlertCircle, Upload } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/components/TranslationProvider';
 import toast from 'react-hot-toast';
@@ -83,12 +83,14 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
     }
   };
 
-  const handleFileUpload = async (files: FileList) => {
+  const handleFileUpload = async (files: File[] | FileList) => {
     const uploadedUrls: string[] = [];
     const uploadedTypes: string[] = [];
     let hasErrors = false;
 
-    for (const file of Array.from(files)) {
+    const fileArray = Array.from(files);
+
+    for (const file of fileArray) {
       try {
         const formData = new FormData();
         formData.append('file', file);
@@ -176,7 +178,7 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
       });
 
       if (!hasErrors && validFiles.length > 0) {
-        handleFileUpload(validFiles as any);
+        handleFileUpload(validFiles);
       }
     }
   }, [mediaUrls, mediaTypes]);
@@ -199,7 +201,7 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
       });
 
       if (!hasErrors && validFiles.length > 0) {
-        handleFileUpload(validFiles as any);
+        handleFileUpload(validFiles);
       }
     }
   };
@@ -376,7 +378,7 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
                     className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500"
                   />
                   <label htmlFor="postToFeed" className="text-sm text-gray-700">
-                    Also post to news feed
+                    Also post to feed
                   </label>
                 </div>
               )}

@@ -228,7 +228,7 @@ export default function HelpPage() {
               transition={{ delay: 0.2 }}
               className="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12"
             >
-              {supportOptions.map((option, index) => {
+              {supportOptions.map((option, _index) => {
                 const Icon = option.icon;
                 return (
                   <div

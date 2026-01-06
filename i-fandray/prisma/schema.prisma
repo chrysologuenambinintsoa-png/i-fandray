@@ -22,6 +22,7 @@ model User {
   website         String?
   dateOfBirth     DateTime?
   gender          String?
+  emailVerified   DateTime? // Ajouté pour NextAuth OAuth
   isVerified      Boolean   @default(false)
   isActive        Boolean   @default(true)
   isOnline        Boolean   @default(false)
@@ -57,7 +58,9 @@ model User {
   receivedMessages Message[] @relation("MessageReceiver")
   blockedUsers    Block[]     @relation("UserBlocks")
   blockedBy       Block[]     @relation("UserBlocked")
-  news            News[]
+  videos          Video[]
+  videoLikes      VideoLike[]
+  videoComments   VideoComment[]
   encryptionKeys  EncryptionKey[]
   ownedSharedKeys SharedKey[] @relation("SharedKeyOwner")
   receivedSharedKeys SharedKey[] @relation("SharedKeyRecipient")
@@ -373,24 +376,58 @@ model Block {
   @@map("Block")
 }
 
-model News {
+model Video {
   id          String   @id @default(cuid())
   title       String
-  content     String
-  summary     String?
-  imageUrl    String?
-  source      String
+  description String
+  videoUrl    String
+  thumbnailUrl String?
+  duration    Int      // Durée en secondes
+  views       Int      @default(0)
+  likes       Int      @default(0)
+  comments    Int      @default(0)
   category    String
-  url         String   @unique
-  publishedAt DateTime
+  isLive      Boolean  @default(false)
+  isTrending  Boolean  @default(false)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   authorId    String
 
   // Relations
-  author User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  videoLikes  VideoLike[]
+  videoComments VideoComment[]
 
-  @@map("News")
+  @@map("Video")
+}
+
+model VideoLike {
+  id       String @id @default(cuid())
+  userId   String
+  videoId  String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, videoId])
+  @@map("VideoLike")
+}
+
+model VideoComment {
+  id       String @id @default(cuid())
+  content  String
+  userId   String
+  videoId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  video Video @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@map("VideoComment")
 }
 
 // Clés de chiffrement E2EE

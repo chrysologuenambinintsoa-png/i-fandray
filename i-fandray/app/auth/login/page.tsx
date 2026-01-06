@@ -1,31 +1,65 @@
 'use client';
 
-import React, { useState, useEffect, Suspense } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { signIn } from 'next-auth/react';
+import React, { useState, Suspense } from 'react';
+import { useRouter } from 'next/navigation';
+import { signIn, signOut } from 'next-auth/react';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 function LoginPageContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
-  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
-  const [showResetMessage, setShowResetMessage] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  const [showResetMessage, setShowResetMessage] = useState(false);
 
-  useEffect(() => {
-    if (searchParams.get('registered') === 'true') {
-      setShowWelcomeMessage(true);
+  const handleSocialLogin = async (provider: 'google' | 'facebook') => {
+    try {
+      setIsLoading(true);
+      console.log(`🔄 Starting ${provider} login...`);
+
+      // Sign out first to ensure clean OAuth flow
+      await signOut({ redirect: false });
+      console.log('🔄 Signed out existing session');
+
+      // Small delay to ensure sign out is complete
+      await new Promise(resolve => setTimeout(resolve, 500));
+
+      // Now sign in with the provider
+      const result = await signIn(provider, {
+        callbackUrl: '/feed',
+        redirect: false, // Don't redirect automatically, handle it manually
+      });
+
+      console.log(`${provider} signIn result:`, result);
+
+      if (result?.error) {
+        console.error(`${provider} login error:`, result.error);
+        alert(`${provider} login failed: ${result.error}`);
+      } else if (result?.url) {
+        console.log(`${provider} login successful, redirecting to:`, result.url);
+        window.location.href = result.url;
+      } else if (result?.ok) {
+        console.log(`${provider} login successful`);
+        router.push('/feed');
+      } else {
+        console.log(`${provider} login completed without specific result`);
+        // Check if user is authenticated
+        setTimeout(() => {
+          router.push('/feed');
+        }, 1000);
+      }
+    } catch (error: any) {
+      console.error(`${provider} login failed:`, error.message);
+      alert(`${provider} login failed: ${error.message}`);
+    } finally {
+      setIsLoading(false);
     }
-    if (searchParams.get('reset') === 'true') {
-      setShowResetMessage(true);
-    }
-  }, [searchParams]);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,17 +82,6 @@ function LoginPageContent() {
       console.error('Login failed:', err.message);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleSocialLogin = async (provider: string) => {
-    try {
-      const result = await signIn(provider, { callbackUrl: '/feed' });
-      if (result?.error) {
-        throw new Error(result.error);
-      }
-    } catch (err: any) {
-      console.error(`Failed to login with ${provider}:`, err.message);
     }
   };
 

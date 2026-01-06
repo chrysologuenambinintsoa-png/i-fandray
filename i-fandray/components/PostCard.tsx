@@ -4,8 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Heart, MessageCircle, Share2, MoreHorizontal, ThumbsUp } from 'lucide-react';
 import { Post } from '@/types';
-import { formatNumber, formatDate, getMediaExtension, isVideo, isImage } from '@/lib/utils';
-import { cn } from '@/lib/utils';
+import { formatNumber, formatDate, cn, isVideo } from '@/lib/utils';
 import { useTranslation } from '@/components/TranslationProvider';
 import { ReactionButton } from './ReactionButton';
 import { CommentThread } from './CommentThread';
@@ -24,17 +23,14 @@ interface PostCardProps {
 export function PostCard({
   post,
   onLike,
-  onComment,
   onShare,
   onEdit,
   onDelete,
   onReport,
   showFullContent = false,
 }: PostCardProps) {
-  const [isLiked, setIsLiked] = useState(false);
-  const [likes, setLikes] = useState<number>(post._count?.likes || 0);
-  const [comments, setComments] = useState(post.comments || []);
-  const [newComment, setNewComment] = useState('');
+  const [likes, setLikes] = useState<number>(post._count?.likes ?? 0);
+  const [comments, setComments] = useState(post.comments ?? []);
   const [showComments, setShowComments] = useState(false);
   const [showReactions, setShowReactions] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
@@ -43,11 +39,11 @@ export function PostCard({
   const { t } = useTranslation();
 
   const reactions = [
-    { emoji: '👍', label: t('reactions.like') || 'Like', color: 'text-blue-600' },
-    { emoji: '🤝', label: t('reactions.solidarity') || 'Solidarity', color: 'text-green-600' },
-    { emoji: '❤️', label: t('reactions.love') || 'Love', color: 'text-red-600' },
-    { emoji: '😢', label: t('reactions.sad') || 'Sad', color: 'text-blue-500' },
-    { emoji: '😲', label: t('reactions.wow') || 'Wow', color: 'text-purple-600' },
+    { emoji: '👍', label: t('reactions.like') ?? 'Like', color: 'text-blue-600' },
+    { emoji: '🤝', label: t('reactions.solidarity') ?? 'Solidarity', color: 'text-green-600' },
+    { emoji: '❤️', label: t('reactions.love') ?? 'Love', color: 'text-red-600' },
+    { emoji: '😢', label: t('reactions.sad') ?? 'Sad', color: 'text-blue-500' },
+    { emoji: '😲', label: t('reactions.wow') ?? 'Wow', color: 'text-purple-600' },
   ];
 
   const [selectedReaction, setSelectedReaction] = useState<string | null>(null);
@@ -99,10 +95,6 @@ export function PostCard({
     setShowComments(!showComments);
   };
 
-  const handleShare = () => {
-    onShare?.(post.id);
-  };
-
   const handleDelete = async () => {
     const ok = confirm('Supprimer cette publication ? Cette action est irréversible.');
     if (!ok) return;
@@ -140,7 +132,7 @@ export function PostCard({
   }, [showComments, comments.length, fetchComments]);
 
   return (
-    <article className="card fancy-gradient overflow-hidden mb-4">
+    <article className="card overflow-hidden mb-4">
       {/* Post Header */}
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
@@ -152,32 +144,32 @@ export function PostCard({
             />
           ) : (
             <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
-              {post.author?.firstName?.[0] || 'U'}
+              {post.author?.firstName?.[0] ?? 'U'}
             </div>
           )}
           <div>
-            <p className="font-semibold text-gray-900">
+            <p className="font-semibold text-card-foreground">
               {post.author?.firstName} {post.author?.lastName}
             </p>
-            <p className="text-sm text-gray-500">{formatDate(post.createdAt)}</p>
+            <p className="text-sm text-muted-foreground">{formatDate(post.createdAt)}</p>
           </div>
         </div>
         <div className="relative">
           <button
             onClick={() => setShowOptions((s) => !s)}
-            className="text-gray-500 hover:text-gray-700 p-1 rounded focus:outline-none"
+            className="text-muted-foreground hover:text-card-foreground p-1 rounded focus:outline-none"
             title={t('post.moreOptions')}
           >
             <MoreHorizontal className="w-5 h-5" />
           </button>
 
           {showOptions && (
-            <div id={`post-options-${post.id}`} role="menu" className="absolute right-0 mt-1 w-40 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+            <div id={`post-options-${post.id}`} role="menu" className="absolute right-0 mt-1 w-40 card py-1 z-50">
               {currentUser?.id === post.author?.id && (
                 <button
                   role="menuitem"
                   onClick={() => { setShowOptions(false); handleDelete(); }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100 text-red-600"
+                  className="w-full text-left px-4 py-2 hover:bg-muted text-red-600"
                 >
                   Supprimer
                 </button>
@@ -186,7 +178,7 @@ export function PostCard({
                 <button
                   role="menuitem"
                   onClick={() => { setShowOptions(false); onEdit?.(post.id); }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 hover:bg-muted"
                 >
                   Modifier
                 </button>
@@ -194,7 +186,7 @@ export function PostCard({
               <button
                 role="menuitem"
                 onClick={() => { setShowOptions(false); onReport?.(post.id); }}
-                className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                className="w-full text-left px-4 py-2 hover:bg-muted"
               >
                 Signaler
               </button>
@@ -206,15 +198,15 @@ export function PostCard({
       {/* Post Content */}
       <div className="px-4 pb-4">
         {post.content && (
-          <p className="text-gray-900 mb-3 whitespace-pre-wrap">
+          <p className="text-card-foreground mb-3 whitespace-pre-wrap">
             {showFullContent ? post.content : post.content.slice(0, 200)}
             {!showFullContent && post.content.length > 200 && '...'}
           </p>
         )}
 
         {/* Feeling, Location, Tags */}
-        {(post.feeling || post.location || (post.tags && post.tags.length > 0)) && (
-          <div className="text-sm text-gray-600 mb-3">
+        {(post.feeling ?? post.location ?? (post.tags && post.tags.length > 0)) && (
+          <div className="text-sm text-muted-foreground mb-3">
             {post.feeling && (
               <span className="mr-2">
                 is feeling <span className="font-medium">{post.feeling}</span>
@@ -247,7 +239,7 @@ export function PostCard({
                 ) : (
                   <img
                     src={media.url}
-                    alt={media.alt || `Post media ${index + 1}`}
+                    alt={media.alt ?? `Post media ${index + 1}`}
                     className={`post-media rounded-lg`}
                   />
                 )}
@@ -258,7 +250,7 @@ export function PostCard({
       </div>
 
       {/* Post Stats */}
-      <div className="px-4 py-2 border-t border-gray-100 flex items-center justify-between text-sm text-gray-600">
+      <div className="px-4 py-2 border-t border-border flex items-center justify-between text-sm text-muted-foreground">
         <div className="flex items-center space-x-2">
           <div className="flex items-center space-x-1">
             <div className="w-5 h-5 bg-green-600 rounded-full flex items-center justify-center">
@@ -270,12 +262,12 @@ export function PostCard({
         </div>
         <div className="flex space-x-4">
           <span>{formatNumber(comments.length)} {t('post.comments')}</span>
-          <span>{formatNumber(post._count?.shares || 0)} {t('post.shares')}</span>
+          <span>{formatNumber(post._count?.shares ?? 0)} {t('post.shares')}</span>
         </div>
       </div>
 
       {/* Post Actions */}
-      <div className="px-4 py-2 border-t border-gray-100">
+      <div className="px-4 py-2 border-t border-border">
         <ReactionButton
           reactions={reactions}
           selectedReaction={selectedReaction}
@@ -289,7 +281,7 @@ export function PostCard({
             onClick={handleLike}
             className={cn(
               'flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 shadow-sm',
-              selectedReaction ? 'bg-white/10 text-blue-200' : 'bg-white/0 text-gray-700'
+              selectedReaction ? 'bg-white/10 text-blue-200' : 'bg-white/0 text-card-foreground/80'
             )}
           >
             {selectedReaction ? (
@@ -304,7 +296,7 @@ export function PostCard({
 
           <button
             onClick={handleComment}
-            className="flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 text-gray-700"
+            className="flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 text-card-foreground/80"
           >
             <MessageCircle className="w-5 h-5" />
             <span className="text-sm font-medium">Comment</span>
@@ -313,22 +305,22 @@ export function PostCard({
           <div className="relative">
             <button
               onClick={() => setShowShareOptions(!showShareOptions)}
-              className="flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 text-gray-700"
+              className="flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 text-card-foreground/80"
             >
               <Share2 className="w-5 h-5" />
               <span className="text-sm font-medium">Share</span>
             </button>
             {showShareOptions && (
-              <div className="absolute left-1/2 transform -translate-x-1/2 mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 py-1 z-50">
+              <div className="absolute left-1/2 transform -translate-x-1/2 mt-1 w-48 card py-1 z-50">
                 <button
                   onClick={() => { setShowShareOptions(false); onShare?.(post.id, 'message'); }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 hover:bg-muted"
                 >
                   Partager en message
                 </button>
                 <button
                   onClick={() => { setShowShareOptions(false); onShare?.(post.id, 'group'); }}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                  className="w-full text-left px-4 py-2 hover:bg-muted"
                 >
                   Partager dans un groupe
                 </button>
@@ -339,7 +331,7 @@ export function PostCard({
 
         {/* Comments Section */}
         {showComments && (
-          <div className="mt-4 border-t border-gray-100 pt-4">
+          <div className="mt-4 border-t border-border pt-4">
             <CommentThread
               comments={comments}
               postId={post.id}

@@ -1,7 +1,7 @@
 'use client';
 
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, useAnimation } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
 
 interface Particle {
   id: number;

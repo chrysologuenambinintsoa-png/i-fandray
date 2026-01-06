@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Metadata } from 'next';
 import '../styles/globals.css';
+import '../styles/theme.css';
 import { Providers } from '@/components/Providers';
 import { headers } from 'next/headers';
 import { availableLocales } from '@/lib/i18n';

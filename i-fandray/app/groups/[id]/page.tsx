@@ -8,7 +8,7 @@ import { CreatePost } from '@/components/CreatePost';
 import { PostCard } from '@/components/PostCard';
 import { useAuth } from '@/hooks/useAuth';
 import { Group, GroupPost, Post } from '@/types';
-import { Users, Settings, Plus, Edit, Trash2, UserPlus, UserMinus, Crown, Shield } from 'lucide-react';
+import { Plus, UserPlus, UserMinus, Crown, Shield, Settings } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function GroupPage() {

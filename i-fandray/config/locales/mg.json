@@ -40,6 +40,7 @@
     "groups": "Vondrona",
     "news": "Vaovao",
     "live": "Mivantana",
+    "video": "Video",
     "help": "Fanampiana",
     "settings": "Fikirakirana"
   },
@@ -133,5 +134,12 @@
     "lightMode": "Fomba mazava",
     "darkMode": "Fomba maizina",
     "settings": "Fikirakirana"
+  },
+  "splash": {
+    "tagline": "Hifandray, Hizara, Hahita"
+  },
+  "feed": {
+    "welcome": "Tongasoa ao amin'ny Feed-nao",
+    "loginPrompt": "Azafady midira raha hijery ny feed namboarina ho anao"
   }
 }

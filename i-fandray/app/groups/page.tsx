@@ -86,7 +86,7 @@ export default function GroupsPage() {
     }
   };
 
-  const joinGroup = async (groupId: string) => {
+  const joinGroup = async (_groupId: string) => {
     try {
       // This would need a separate API endpoint for joining groups
       // For now, we'll just show a success message

@@ -24,7 +24,6 @@ interface UserGroupsCardProps {
 }
 
 export function UserGroupsCard({ onClose }: UserGroupsCardProps) {
-  const { user } = useAuth();
   const [groups, setGroups] = useState<Group[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 

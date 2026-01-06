@@ -33,7 +33,6 @@ export function EncryptedMessageInput({
     isInitialized,
     encryptMessage,
     hasSharedKey,
-    establishSharedKey,
   } = useEncryption();
 
   // Vérifie si le chiffrement est disponible pour ce destinataire
@@ -57,9 +56,9 @@ export function EncryptedMessageInput({
       if (isInitialized && isEncrypted && recipientId) {
         try {
           const result = await encryptMessage(contentToSend, recipientId);
-          encryptedData = result.encryptedData;
+          encryptedData = result;
           encryptionKeyId = result.keyId;
-          contentToSend = null; // Le contenu réel est chiffré
+          contentToSend = ''; // Le contenu réel est chiffré
         } catch (error) {
           console.error('Erreur de chiffrement:', error);
           toast.error('Erreur de chiffrement - message envoyé en clair');

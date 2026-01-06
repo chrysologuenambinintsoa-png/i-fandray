@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
@@ -100,7 +100,7 @@ export async function PUT(request: NextRequest) {
       },
     });
 
-    const nextVersion = (currentKey?.keyVersion || 0) + 1;
+    const nextVersion = (currentKey?.keyVersion ?? 0) + 1;
 
     // Désactiver les anciennes clés
     await prisma.encryptionKey.updateMany({

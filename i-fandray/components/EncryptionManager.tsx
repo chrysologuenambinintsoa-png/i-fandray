@@ -23,8 +23,6 @@ export function EncryptionManager({ onEncryptionChange }: EncryptionManagerProps
     error,
     publicKey,
     sharePublicKey,
-    establishSharedKey,
-    hasSharedKey,
     clearAllKeys,
     reinitialize,
   } = useEncryption();
@@ -102,7 +100,7 @@ export function EncryptionManager({ onEncryptionChange }: EncryptionManagerProps
           Chiffrement Bout en Bout
         </CardTitle>
         <CardDescription>
-          Sécurisez vos messages et données avec un chiffrement de bout en bout
+        Vos messages et données sont chiffré de bout en bout
         </CardDescription>
       </CardHeader>
 

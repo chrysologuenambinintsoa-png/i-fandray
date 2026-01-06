@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const type = searchParams.get('type') || 'friends'; // 'friends', 'requests', 'sent'
+    const type = searchParams.get('type') ?? 'friends'; // 'friends', 'requests', 'sent'
 
     const userId = session.user.id;
 
@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Create notification for receiver
-    await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/notifications`, {
+    await fetch(`${process.env.NEXTAUTH_URL ?? 'http://localhost:3000'}/api/notifications`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

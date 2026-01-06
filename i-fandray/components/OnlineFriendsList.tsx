@@ -11,9 +11,9 @@ interface OnlineFriendsListProps {
 }
 
 export function OnlineFriendsList({ className = '' }: OnlineFriendsListProps) {
-  const { user } = useAuth();
   const { privacy } = useSettings();
   const { t } = useTranslation();
+  const { user } = useAuth();
   const [onlineFriends, setOnlineFriends] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const eventSourceRef = useRef<EventSource | null>(null);

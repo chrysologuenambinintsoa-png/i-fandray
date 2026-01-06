@@ -19,7 +19,6 @@ interface FriendSuggestionsCardProps {
 }
 
 export function FriendSuggestionsCard({ onClose }: FriendSuggestionsCardProps) {
-  const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [sendingRequests, setSendingRequests] = useState<Set<string>>(new Set());

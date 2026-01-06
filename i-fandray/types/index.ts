@@ -228,21 +228,6 @@ export interface LiveStream {
   user?: User;
 }
 
-export interface News {
-  id: string;
-  title: string;
-  content: string;
-  summary?: string;
-  imageUrl?: string;
-  source?: string;
-  category: string;
-  url?: string;
-  publishedAt: Date;
-  createdAt: Date;
-  authorId: string;
-  author?: User;
-}
-
 export interface Follow {
   id: string;
   createdAt: Date;

@@ -69,14 +69,7 @@
 - [ ] Live chat integration
 - [ ] Stream recording
 
-## Phase 10: AI Features
-- [ ] AI content recommendations
-- [ ] AI chat assistant
-- [ ] Image recognition
-- [ ] Auto-generated captions
-- [ ] Smart notifications
-
-## Phase 11: News/Feed
+## Phase 10: Video Features
 - [ ] News aggregation
 - [ ] Categorized news
 - [ ] Trending topics

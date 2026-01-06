@@ -3,16 +3,17 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "set PORT=3000 && next dev",
     "dev:all": "concurrently \"npm:signaling\" \"npm:dev\"",
     "dev:all:win": "powershell -ExecutionPolicy Bypass -File ./dev-all.ps1",
     "dev:all:pm2": "pm2 start ecosystem.config.js",
-    "build": "next build",
+    "build": "node polyfill.js",
     "start": "PORT=3000 next start",
     "signaling": "node signaling/server.js",
     "lint": "next lint",
     "postinstall": "prisma generate",
     "sync-news": "npx tsx scripts/sync-news.ts",
+    "seed-videos": "npx tsx scripts/seed-videos.ts",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
@@ -87,5 +88,8 @@
     "tailwindcss": "^3.4.1",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
   }
 }

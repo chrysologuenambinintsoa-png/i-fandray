@@ -68,7 +68,7 @@ export async function POST(
         });
 
         // Create notification for sender
-        await fetch(`${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/api/notifications`, {
+        await fetch(`${process.env.NEXTAUTH_URL ?? 'http://localhost:3000'}/api/notifications`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

@@ -40,6 +40,7 @@
     "groups": "Gruppen",
     "news": "Nachrichten",
     "live": "Live",
+    "video": "Video",
     "help": "Hilfe",
     "settings": "Einstellungen"
   },
@@ -133,5 +134,12 @@
     "lightMode": "Hellmodus",
     "darkMode": "Dunkelmodus",
     "settings": "Einstellungen"
+  },
+  "splash": {
+    "tagline": "Verbinde, Teile, Entdecke"
+  },
+  "feed": {
+    "welcome": "Willkommen in Ihrem Feed",
+    "loginPrompt": "Bitte melden Sie sich an, um Ihren personalisierten Feed zu sehen"
   }
 }

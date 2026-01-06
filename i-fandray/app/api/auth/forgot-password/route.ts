@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     console.log('Expiry:', resetTokenExpiry);
 
     // Update user with reset token
-    const updatedUser = await prisma.user.update({
+    await prisma.user.update({
       where: { id: user.id },
       data: {
         resetToken,
@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
     // Create email transporter
     const transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587'),
+      port: parseInt(process.env.SMTP_PORT ?? '587'),
       secure: false,
       auth: {
         user: process.env.SMTP_USER,
@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
     // Send reset email
     const resetUrl = `${process.env.NEXTAUTH_URL}/auth/reset-password?token=${resetToken}`;
     await transporter.sendMail({
-      from: process.env.SMTP_FROM || 'noreply@ifandray.com',
+      from: process.env.SMTP_FROM ?? 'noreply@ifandray.com',
       to: email,
       subject: 'Reset your i-fandray password',
       html: `

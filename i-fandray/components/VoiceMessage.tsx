@@ -21,7 +21,7 @@ export function VoiceMessage({ onSend, maxDuration = 60 }: VoiceMessageProps) {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<number | null>(null);
 
   useEffect(() => {
     return () => {
@@ -74,7 +74,7 @@ export function VoiceMessage({ onSend, maxDuration = 60 }: VoiceMessageProps) {
           }
           return prev + 1;
         });
-      }, 1000);
+      }, 1000) as unknown as number;
     } catch (error) {
       console.error('Error accessing microphone:', error);
     }

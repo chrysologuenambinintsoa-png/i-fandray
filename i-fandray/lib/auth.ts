@@ -1,9 +1,8 @@
-import NextAuth, { DefaultSession } from 'next-auth';
+import NextAuth, { DefaultSession, NextAuthOptions } from 'next-auth';
 import { PrismaAdapter } from '@next-auth/prisma-adapter';
 import { PrismaClient } from '@prisma/client';
 import GoogleProvider from 'next-auth/providers/google';
 import FacebookProvider from 'next-auth/providers/facebook';
-import GitHubProvider from 'next-auth/providers/github';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import bcrypt from 'bcryptjs';
 
@@ -27,12 +26,39 @@ declare module 'next-auth' {
   }
 }
 
-export const authOptions = {
+declare module 'next-auth/jwt' {
+  interface JWT {
+    id: string;
+    firstName?: string;
+    lastName?: string;
+    username?: string;
+  }
+}
+
+export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      profile(profile) {
+        // Split the name into firstName and lastName
+        const nameParts = profile.name?.split(' ') || [];
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        // Generate a unique username from email
+        const baseUsername = profile.email?.split('@')[0] || profile.name?.toLowerCase().replace(/\s+/g, '') || 'user';
+
+        return {
+          id: profile.sub,
+          email: profile.email,
+          avatar: profile.picture, // Map image to avatar for Prisma
+          firstName: firstName,
+          lastName: lastName,
+          username: baseUsername, // We'll handle uniqueness in the signIn callback
+        };
+      },
     }),
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID!,
@@ -42,10 +68,29 @@ export const authOptions = {
           scope: 'email,public_profile',
         },
       },
-    }),
-    GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      userinfo: {
+        params: {
+          fields: 'id,name,email,picture',
+        },
+      },
+      profile(profile) {
+        // Split the name into firstName and lastName
+        const nameParts = profile.name?.split(' ') || [];
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+
+        // Generate a unique username from email or name
+        const baseUsername = profile.email?.split('@')[0] || profile.name?.toLowerCase().replace(/\s+/g, '') || 'user';
+
+        return {
+          id: profile.id,
+          email: profile.email,
+          avatar: profile.picture?.data?.url || profile.picture, // Handle Facebook's nested picture structure
+          firstName: firstName,
+          lastName: lastName,
+          username: baseUsername, // We'll handle uniqueness in the signIn callback
+        };
+      },
     }),
     CredentialsProvider({
       name: 'credentials',
@@ -54,144 +99,164 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
-        if (!credentials?.password) {
-          throw new Error('Password is required');
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Email and password are required');
         }
 
-        if (!credentials.email) {
-          throw new Error('Email is required');
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+          });
+
+          if (!user) {
+            throw new Error('No account found with this email address');
+          }
+
+          if (!user.password) {
+            throw new Error('This account uses social login. Please use Google or Facebook to sign in.');
+          }
+
+          const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          if (!isPasswordValid) {
+            throw new Error('Invalid password');
+          }
+
+          return {
+            id: user.id,
+            email: user.email,
+            name: `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+            image: user.avatar,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            username: user.username,
+          };
+        } catch (error) {
+          console.error('Credentials authorization error:', error);
+          throw error;
         }
-
-        const user = await prisma.user.findUnique({
-          where: {
-            email: credentials.email,
-          },
-        });
-
-        if (!user) {
-          throw new Error('No account found with this email address');
-        }
-
-        if (!user.password) {
-          throw new Error('This account uses social login. Please use the appropriate social login button.');
-        }
-
-        const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
-        if (!isPasswordValid) {
-          throw new Error('Invalid password');
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: `${user.firstName} ${user.lastName}`,
-          image: user.avatar,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username,
-        };
       },
     }),
   ],
   session: {
-    strategy: 'jwt' as const,
+    strategy: 'database',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+    updateAge: 24 * 60 * 60, // 24 hours
   },
   callbacks: {
-    async signIn({ user, account, profile }: {
-      user: any;
-      account: any;
-      profile?: any;
-    }) {
-      if (account?.provider === 'google' || account?.provider === 'facebook' || account?.provider === 'github') {
-        try {
-          // Check if user exists
-          let existingUser = await prisma.user.findUnique({
-            where: { email: user.email! },
-          });
+    async signIn({ user, account, profile }) {
+      console.log('🔐 SignIn callback triggered:', {
+        provider: account?.provider,
+        email: user?.email,
+        hasProfile: !!profile,
+        accountType: account?.type,
+        error: account?.error,
+        timestamp: new Date().toISOString()
+      });
 
-          if (!existingUser) {
-            // Create new user for social login
-            const nameParts = user.name?.split(' ') || [];
-            const firstName = nameParts[0] || '';
-            const lastName = nameParts.slice(1).join(' ') || '';
-
-            // Generate unique username
-            let username = user.email!.split('@')[0];
-            let counter = 1;
-            while (await prisma.user.findUnique({ where: { username } })) {
-              username = `${user.email!.split('@')[0]}${counter}`;
-              counter++;
-            }
-
-            existingUser = await prisma.user.create({
-              data: {
-                email: user.email!,
-                firstName,
-                lastName,
-                username,
-                avatar: user.image,
-                isVerified: true, // Social logins are pre-verified
-              },
-            });
-          }
-
-          // Update user info if needed
-          if (existingUser && (!existingUser.avatar || existingUser.avatar !== user.image)) {
-            await prisma.user.update({
-              where: { id: existingUser.id },
-              data: { avatar: user.image },
-            });
-          }
-
-          // Attach user id to the token
-          user.id = existingUser.id;
-          return true;
-        } catch (error) {
-          console.error('Error during social sign in:', error);
+      // For OAuth providers, ensure user data is properly formatted
+      if (account?.provider === 'google' || account?.provider === 'facebook') {
+        // For Facebook, email might not be available, so we allow sign in anyway
+        if (account.provider === 'facebook' && !user.email) {
+          console.log('⚠️ Facebook login without email - allowing sign in with generated email');
+          // Generate a temporary email using Facebook ID
+          user.email = `facebook-${account.providerAccountId}@temp.local`;
+        } else if (!user.email) {
+          console.error('❌ OAuth user has no email for provider:', account.provider);
           return false;
         }
+
+        // Ensure we have firstName and lastName
+        if (!user.firstName || !user.lastName) {
+          const nameParts = user.name?.split(' ') || [];
+          user.firstName = user.firstName || nameParts[0] || '';
+          user.lastName = user.lastName || nameParts.slice(1).join(' ') || '';
+        }
+
+        // Generate unique username if not provided or if it already exists
+        if (!user.username) {
+          const baseUsername = user.email?.split('@')[0] || user.name?.toLowerCase().replace(/\s+/g, '') || 'user';
+          user.username = baseUsername;
+        }
+
+        // Check if username exists and make it unique
+        let username = user.username;
+        let counter = 1;
+        while (true) {
+          try {
+            const existingUser = await prisma.user.findUnique({
+              where: { username }
+            });
+            if (!existingUser) break;
+            username = `${user.username}${counter}`;
+            counter++;
+          } catch (error) {
+            console.error('Error checking username uniqueness:', error);
+            // If we can't check, use a timestamp-based username
+            username = `${user.username}_${Date.now()}`;
+            break;
+          }
+        }
+        user.username = username;
+
+        console.log('✅ OAuth user data prepared:', {
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          username: user.username
+        });
+
+        return true;
       }
+
+      // For credentials provider, just return true
       return true;
     },
-    async jwt({ token, user }: any) {
+
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
         token.username = user.username;
-        token.email = user.email;
-        token.avatar = user.avatar;
-        token.bio = user.bio;
-        token.isVerified = user.isVerified;
-        token.isActive = user.isActive;
-        token.language = user.language;
-        token.theme = user.theme;
-        token.createdAt = user.createdAt;
-        token.updatedAt = user.updatedAt;
       }
       return token;
     },
-    async session({ session, token }: any) {
+
+    async session({ session, token }) {
       if (token) {
         session.user.id = token.id;
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;
         session.user.username = token.username;
-        session.user.email = token.email;
-        session.user.avatar = token.avatar;
-        session.user.bio = token.bio;
-        session.user.isVerified = token.isVerified;
-        session.user.isActive = token.isActive;
-        session.user.language = token.language;
-        session.user.theme = token.theme;
-        session.user.createdAt = token.createdAt;
-        session.user.updatedAt = token.updatedAt;
       }
       return session;
+    },
+
+    async redirect({ url, baseUrl }) {
+      // Redirect to home page which will handle the proper redirection based on auth status
+      if (url.startsWith('/')) return `${baseUrl}${url}`;
+      if (new URL(url).origin === baseUrl) return url;
+      return baseUrl; // Redirect to home page instead of /feed directly
     },
   },
   pages: {
     signIn: '/auth/login',
-    signUp: '/auth/register',
+    error: '/auth/error',
+  },
+  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
+  useSecureCookies: process.env.NODE_ENV === 'production',
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: 'lax',
+        path: '/',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
 };
+
+export default NextAuth(authOptions);
