@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
     let session = await getServerSession(authOptions);
+    console.debug('[post:id] DELETE called', { id: params.id, method: request.method, initialSession: !!session?.user?.id });
 
     // Fallbacks: try getToken then prisma session lookup if needed
     if (!session?.user?.id) {
@@ -35,7 +36,11 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       }
     }
 
+    const cookiePresent = Boolean(request.cookies.get('next-auth.session-token')?.value);
+    console.debug('[post:id] session state after fallbacks', { sessionUserId: session?.user?.id, cookiePresent });
+
     if (!session?.user?.id) {
+      console.debug('[post:id] Unauthorized access attempt', { id: params.id, cookiePresent });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -96,7 +101,11 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
+    const cookiePresentPut = Boolean(request.cookies.get('next-auth.session-token')?.value);
+    console.debug('[post:id] PUT session state after fallbacks', { sessionUserId: session?.user?.id, cookiePresent: cookiePresentPut });
+
     if (!session?.user?.id) {
+      console.debug('[post:id] Unauthorized access attempt (PUT)', { id: params.id, cookiePresent: cookiePresentPut });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

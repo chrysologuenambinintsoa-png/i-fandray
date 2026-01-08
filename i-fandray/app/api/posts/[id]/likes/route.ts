@@ -9,6 +9,7 @@ export async function POST(
 ) {
   try {
     let session = await getServerSession(authOptions);
+    console.debug('[post:id:likes] POST called', { id: params.id, method: request.method, initialSession: !!session?.user?.id });
 
     // Fallbacks: token then prisma session lookup
     if (!session?.user?.id) {
@@ -38,7 +39,11 @@ export async function POST(
       }
     }
 
+    const cookiePresent = Boolean(request.cookies.get('next-auth.session-token')?.value);
+    console.debug('[post:id:likes] session state after fallbacks', { sessionUserId: session?.user?.id, cookiePresent });
+
     if (!session?.user?.id) {
+      console.debug('[post:id:likes] Unauthorized access attempt', { id: params.id, cookiePresent });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -164,6 +169,7 @@ export async function DELETE(
 ) {
   try {
     let session = await getServerSession(authOptions);
+    console.debug('[post:id:likes] DELETE called', { id: params.id, method: request.method, initialSession: !!session?.user?.id });
 
     // Fallbacks: token then prisma session lookup
     if (!session?.user?.id) {
@@ -193,7 +199,11 @@ export async function DELETE(
       }
     }
 
+    const cookiePresentDel = Boolean(request.cookies.get('next-auth.session-token')?.value);
+    console.debug('[post:id:likes] DELETE session state after fallbacks', { sessionUserId: session?.user?.id, cookiePresent: cookiePresentDel });
+
     if (!session?.user?.id) {
+      console.debug('[post:id:likes] Unauthorized access attempt (DELETE)', { id: params.id, cookiePresent: cookiePresentDel });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 

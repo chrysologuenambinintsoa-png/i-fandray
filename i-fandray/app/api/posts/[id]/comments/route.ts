@@ -78,6 +78,7 @@ export async function POST(
 ) {
   try {
     let session = await getServerSession(authOptions);
+    console.debug('[post:id:comments] POST called', { id: params.id, method: request.method, initialSession: !!session?.user?.id });
 
     // Fallbacks: token then prisma session lookup
     if (!session?.user?.id) {
@@ -107,7 +108,11 @@ export async function POST(
       }
     }
 
+    const cookiePresent = Boolean(request.cookies.get('next-auth.session-token')?.value);
+    console.debug('[post:id:comments] session state after fallbacks', { sessionUserId: session?.user?.id, cookiePresent });
+
     if (!session?.user?.id) {
+      console.debug('[post:id:comments] Unauthorized access attempt', { id: params.id, cookiePresent });
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
