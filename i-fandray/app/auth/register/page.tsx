@@ -6,6 +6,7 @@ import { Eye, EyeOff, User, Lock, Mail } from 'lucide-react';
 import Link from 'next/link';
 import { validateEmail, validatePassword } from '@/lib/utils';
 import { signIn } from 'next-auth/react';
+import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -119,8 +120,15 @@ export default function RegisterPage() {
 
       if (!response.ok) {
         const errorData = await response.json();
+        console.error('[Register] API error:', errorData);
         throw new Error(errorData.error || 'Registration failed');
       }
+
+      const registrationData = await response.json();
+      console.log('[Register] Success:', registrationData);
+      
+      // Show success message
+      toast.success('Compte créé avec succès! Bienvenue sur i-fandray 🎉');
 
       // Auto-login after successful registration
       try {
@@ -131,24 +139,36 @@ export default function RegisterPage() {
         });
 
         if (result?.error) {
-          console.warn('Auto-login failed, redirecting to login page:', result.error);
-          // If auto-login fails, redirect to login with success message
-          router.push('/auth/login?registered=true');
+          console.warn('Auto-login failed, redirecting to welcome page:', result.error);
+          // If auto-login fails, redirect to login
+          setTimeout(() => {
+            router.push('/auth/login');
+          }, 1500);
           return;
         }
 
-        // Redirect to welcome page if auto-login successful
-        router.push('/welcome');
+        if (result?.ok) {
+          console.log('[Register] Auto-login successful');
+          // Wait for session to be established before redirecting
+          await new Promise(resolve => setTimeout(resolve, 500));
+          
+          // Redirect to welcome page for first-time setup
+          router.push('/welcome');
+        }
       } catch (loginError) {
         console.warn('Auto-login failed:', loginError);
-        // Fallback: redirect to login page
-        router.push('/auth/login?registered=true');
+        // Fallback: redirect to welcome page
+        setTimeout(() => {
+          router.push('/welcome');
+        }, 1500);
       }
     } catch (err: any) {
+      const errorMessage = err.message || 'Registration failed. Please try again.';
       setErrors({
         ...errors,
-        submit: err.message || 'Registration failed. Please try again.',
+        submit: errorMessage,
       });
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -180,6 +200,13 @@ export default function RegisterPage() {
 
           {/* Register Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Error Message */}
+            {errors.submit && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                {errors.submit}
+              </div>
+            )}
+
             {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
               <div>

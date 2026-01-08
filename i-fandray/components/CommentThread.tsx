@@ -145,7 +145,7 @@ function CommentItem({
               className="mt-3 flex space-x-3"
             >
               <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center text-white text-xs font-semibold">
-                {user?.firstName?.[0] || 'Y'}
+                {user?.firstName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'Y'}
               </div>
               <div className="flex-1 flex gap-2">
                 <input
@@ -263,7 +263,7 @@ export function CommentThread({ comments, postId, onCommentAdded }: CommentThrea
             />
           ) : (
             <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
-              {user?.firstName?.[0] || 'Y'}
+              {user?.firstName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'Y'}
             </div>
           )}
         </div>

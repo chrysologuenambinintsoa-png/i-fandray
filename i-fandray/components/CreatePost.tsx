@@ -95,17 +95,21 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
 
     for (const file of fileArray) {
       try {
+        console.log(`[CreatePost] Uploading file: ${file.name}`, { size: file.size, type: file.type });
         const result = await uploadToCloudinary(file, { folder: 'posts' });
+        console.log(`[CreatePost] Upload result:`, result);
         // Cloudinary returns `secure_url` for the uploaded asset
         const url = result.secure_url || result.url || result.secureUrl;
-        if (!url) throw new Error('Upload returned no URL');
+        if (!url) throw new Error(`Upload returned no URL. Result: ${JSON.stringify(result)}`);
 
+        console.log(`[CreatePost] Upload successful for ${file.name}: ${url}`);
         uploadedUrls.push(url);
         uploadedTypes.push(file.type);
         toast.success(`${file.name} uploaded successfully`);
       } catch (error) {
-        console.error('Error uploading file:', error);
+        console.error('[CreatePost] Error uploading file:', error);
         const errorMessage = error instanceof Error ? error.message : `Failed to upload ${file.name}`;
+        console.error('[CreatePost] Error details:', { error, file: file.name, errorMessage });
         toast.error(errorMessage);
         hasErrors = true;
       }
@@ -209,9 +213,17 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
       <div className="p-4">
         {/* Header */}
         <div className="flex items-center space-x-3 mb-4">
-          <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
-            U
-          </div>
+          {user?.avatar ? (
+            <img
+              src={user.avatar}
+              alt={user.firstName}
+              className="w-10 h-10 rounded-full object-cover ring-2 ring-green-500/30"
+            />
+          ) : (
+            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
+              {user?.firstName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'U'}
+            </div>
+          )}
           <div
             onClick={() => setIsExpanded(true)}
             className={`flex-1 bg-gray-100 rounded-full px-4 py-3 cursor-pointer transition-colors ${

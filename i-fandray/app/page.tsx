@@ -3,20 +3,31 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSession } from 'next-auth/react';
-import { Splashscreen } from '@/components/Splashscreen';
+import dynamic from 'next/dynamic';
+
+// Dynamically import Splashscreen to avoid scroll issues
+const Splashscreen = dynamic(() => import('@/components/Splashscreen').then(mod => ({ default: mod.Splashscreen })), {
+  ssr: false,
+  loading: () => null
+});
 
 export default function Home() {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [showSplash, setShowSplash] = useState(true);
+  const [hasRedirected, setHasRedirected] = useState(false);
 
   useEffect(() => {
-    if (status === 'loading') return; // Wait for session to load
+    // Only run this effect once and when status is not 'loading'
+    if (status === 'loading' || hasRedirected) return;
 
-    // Show splash screen for 1 second
+    // Show splash screen for 1 second before redirecting
     const timer = setTimeout(() => {
       setShowSplash(false);
-      if (session?.user) {
+      setHasRedirected(true);
+
+      if (session?.user?.email) {
+        // User is authenticated
         try {
           const seen = localStorage.getItem('seenWelcome');
           if (!seen || seen !== 'true') {
@@ -26,15 +37,15 @@ export default function Home() {
         } catch (e) {
           // ignore localStorage errors
         }
-
         router.push('/feed');
       } else {
+        // User is not authenticated
         router.push('/auth/login');
       }
     }, 1000);
 
     return () => clearTimeout(timer);
-  }, [router, session, status]);
+  }, [router, session?.user?.email, status, hasRedirected]);
 
   if (showSplash || status === 'loading') {
     return <Splashscreen />;

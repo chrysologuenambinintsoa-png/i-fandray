@@ -31,7 +31,7 @@ export function ReactionButton({
   };
 
   return (
-    <div className="relative">
+    <div className="relative z-50">
       {/* Reaction Selector */}
       <AnimatePresence>
         {showReactions && (
@@ -40,7 +40,7 @@ export function ReactionButton({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.8, y: 10 }}
             transition={{ duration: 0.2 }}
-            className="absolute bottom-full mb-2 p-3 bg-white rounded-lg shadow-lg border border-gray-200 z-10"
+            className="absolute bottom-full mb-2 p-3 bg-white/95 text-gray-900 rounded-lg shadow-lg border border-white/10 z-50"
           >
             <div className="flex items-center justify-center gap-2">
               {reactions.map((reaction) => (

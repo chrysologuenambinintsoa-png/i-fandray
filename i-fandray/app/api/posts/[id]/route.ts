@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/auth';
 
 export async function DELETE(request: NextRequest, { params }: { params: { id: string } }) {
   try {
+    console.log('[POST DELETE] Starting delete for post:', params.id);
     let session = await getServerSession(authOptions);
     console.debug('[post:id] DELETE called', { id: params.id, method: request.method, initialSession: !!session?.user?.id });
 
@@ -16,6 +17,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
         if (token) {
           // @ts-ignore
           session = { user: { id: token.id || token.sub } } as any;
+          console.log('[POST DELETE] Session recovered from JWT token');
         }
       } catch (tokErr) {
         console.debug('[post:id] getToken fallback failed:', tokErr);
@@ -28,6 +30,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
             const sessionRecord = await prisma.session.findUnique({ where: { sessionToken: cookieVal } });
             if (sessionRecord?.userId) {
               session = { user: { id: sessionRecord.userId } } as any;
+              console.log('[POST DELETE] Session recovered from cookie');
             }
           }
         } catch (dbErr) {
@@ -40,7 +43,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     console.debug('[post:id] session state after fallbacks', { sessionUserId: session?.user?.id, cookiePresent });
 
     if (!session?.user?.id) {
-      console.debug('[post:id] Unauthorized access attempt', { id: params.id, cookiePresent });
+      console.log('[POST DELETE] Unauthorized - no session user ID');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -49,22 +52,38 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     // Verify ownership
     const post = await prisma.post.findUnique({ where: { id: postId } });
     if (!post) {
+      console.log('[POST DELETE] Post not found:', postId);
       return NextResponse.json({ error: 'Post not found' }, { status: 404 });
     }
+    
+    console.log('[POST DELETE] Post found. Checking ownership.', { 
+      postAuthorId: post.authorId, 
+      sessionUserId: session.user.id, 
+      isOwner: post.authorId === session.user.id 
+    });
+    
     if (post.authorId !== session.user.id) {
+      console.log('[POST DELETE] Forbidden - user does not own this post');
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
     // Delete post (cascade depends on prisma schema). Attempt to remove related records first for safety.
+    console.log('[POST DELETE] Deleting comments...');
     await prisma.comment.deleteMany({ where: { postId } });
+    
+    console.log('[POST DELETE] Deleting likes...');
     await prisma.like.deleteMany({ where: { postId } });
+    
+    console.log('[POST DELETE] Deleting shares...');
     await prisma.share.deleteMany({ where: { postId } });
 
+    console.log('[POST DELETE] Deleting post...');
     await prisma.post.delete({ where: { id: postId } });
 
+    console.log('[POST DELETE] Post deleted successfully');
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting post:', error);
+    console.error('[POST DELETE] Error deleting post:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

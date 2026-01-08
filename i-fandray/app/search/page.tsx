@@ -78,12 +78,14 @@ export default function SearchPage() {
           {post.author?.avatar ? (
             <img src={post.author.avatar} alt={post.author.firstName} className="w-full h-full rounded-full object-cover" />
           ) : (
-            post.author?.firstName?.[0]?.toUpperCase() || '?'
+            post.author?.firstName?.[0]?.toUpperCase() || post.author?.username?.[0]?.toUpperCase() || '?'
           )}
         </div>
         <div>
           <span className="font-semibold text-gray-900 dark:text-white">
-            {post.author?.firstName} {post.author?.lastName}
+            {post.author?.firstName && post.author?.lastName 
+              ? `${post.author.firstName} ${post.author.lastName}` 
+              : post.author?.username || 'Unknown User'}
           </span>
           <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
             {new Date(post.createdAt).toLocaleDateString()}

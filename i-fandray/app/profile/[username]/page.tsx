@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
@@ -8,6 +8,7 @@ import { PostCard } from '@/components/PostCard';
 import { Edit, MapPin, Calendar, Link as LinkIcon, Camera, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { User, Post } from '@/types';
+import toast from 'react-hot-toast';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -18,9 +19,57 @@ export default function ProfilePage() {
   const [activeTab, setActiveTab] = useState<'posts' | 'photos' | 'videos'>('posts');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isUploadingCover, setIsUploadingCover] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   const username = params.username as string;
   const isOwnProfile = currentUser?.username === username;
+
+  const uploadProfilePhoto = async (file: File, type: 'avatar' | 'cover') => {
+    try {
+      if (type === 'avatar') setIsUploadingAvatar(true);
+      else setIsUploadingCover(true);
+
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('type', type);
+
+      const response = await fetch('/api/users/profile/photo', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to upload photo');
+      }
+
+      const updatedUser = await response.json();
+      setUser(updatedUser);
+      toast.success(`${type === 'avatar' ? 'Profile' : 'Cover'} photo updated!`);
+    } catch (err) {
+      console.error('Error uploading photo:', err);
+      toast.error('Failed to update photo');
+    } finally {
+      if (type === 'avatar') setIsUploadingAvatar(false);
+      else setIsUploadingCover(false);
+    }
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadProfilePhoto(file, 'avatar');
+    }
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      uploadProfilePhoto(file, 'cover');
+    }
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,7 +94,7 @@ export default function ProfilePage() {
         const postsResponse = await fetch(`/api/posts?authorId=${userData.id}&limit=20`);
         if (postsResponse.ok) {
           const postsData = await postsResponse.json();
-          setPosts(postsData);
+          setPosts(Array.isArray(postsData) ? postsData : postsData.posts || []);
         }
       } catch (err) {
         console.error('Error fetching user data:', err);
@@ -113,12 +162,6 @@ export default function ProfilePage() {
     );
   }
 
-  const tabs = [
-    { id: 'posts' as const, label: 'Posts', count: posts.length },
-    { id: 'photos' as const, label: 'Photos', count: 24 },
-    { id: 'videos' as const, label: 'Videos', count: 8 },
-  ];
-
   return (
     <div className="min-h-screen bg-gray-100">
       <Header />
@@ -129,22 +172,39 @@ export default function ProfilePage() {
         <main className="flex-1 lg:ml-64">
           <div className="max-w-4xl mx-auto">
             {/* Cover Photo */}
-            <div className="relative h-64 bg-gradient-to-r from-green-600 to-blue-600 fancy-gradient overflow-hidden rounded-b-2xl">
+            <div className="relative h-64 bg-gradient-to-r from-green-600 to-blue-600 fancy-gradient overflow-hidden rounded-b-2xl group cursor-pointer">
               {user.coverPhoto ? (
                 <img
                   src={user.coverPhoto}
                   alt="Cover"
-                  className="w-full h-full object-cover opacity-90"
+                  className="w-full h-full object-cover opacity-90 group-hover:opacity-75 transition-opacity"
                 />
               ) : (
                 <div className="w-full h-full bg-gradient-to-r from-green-500 to-blue-600" />
               )}
               <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
               {isOwnProfile && (
-                <button className="absolute bottom-4 right-4 bg-white/90 text-gray-800 px-4 py-2 rounded-full text-sm font-semibold hover:shadow-md transition-shadow">
-                  <Camera className="w-4 h-4 inline mr-2" />
-                  Edit Cover
-                </button>
+                <>
+                  <input
+                    ref={coverInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleCoverChange}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={isUploadingCover}
+                    className="absolute bottom-4 right-4 bg-white/90 text-gray-800 px-4 py-2 rounded-full text-sm font-semibold hover:shadow-md transition-shadow disabled:opacity-50"
+                  >
+                    {isUploadingCover ? (
+                      <Loader2 className="w-4 h-4 inline mr-2 animate-spin" />
+                    ) : (
+                      <Camera className="w-4 h-4 inline mr-2" />
+                    )}
+                    {isUploadingCover ? 'Uploading...' : 'Edit Cover'}
+                  </button>
+                </>
               )}
             </div>
 
@@ -152,16 +212,34 @@ export default function ProfilePage() {
             <div className="relative px-6 pb-6 bg-white border-b border-gray-200">
               {/* Avatar */}
               <div className="absolute -top-20 left-6">
-                <div className="relative">
+                <div className="relative group">
                   <img
                     src={user.avatar || 'https://via.placeholder.com/150'}
                     alt={user.username}
                     className="w-36 h-36 rounded-full border-4 border-white object-cover shadow-lg story-ring"
                   />
                   {isOwnProfile && (
-                    <button className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors" title="Change profile picture">
-                      <Camera className="w-4 h-4 text-gray-700" />
-                    </button>
+                    <>
+                      <input
+                        ref={avatarInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="hidden"
+                      />
+                      <button
+                        onClick={() => avatarInputRef.current?.click()}
+                        disabled={isUploadingAvatar}
+                        className="absolute bottom-2 right-2 bg-white p-2 rounded-full shadow-md hover:bg-gray-100 transition-colors disabled:opacity-50 group-hover:scale-110 transition-transform"
+                        title="Change profile picture"
+                      >
+                        {isUploadingAvatar ? (
+                          <Loader2 className="w-4 h-4 text-gray-700 animate-spin" />
+                        ) : (
+                          <Camera className="w-4 h-4 text-gray-700" />
+                        )}
+                      </button>
+                    </>
                   )}
                   {user.isVerified && (
                     <div className="absolute bottom-2 left-2 bg-blue-500 rounded-full p-1">
@@ -237,15 +315,15 @@ export default function ProfilePage() {
                 {/* Stats */}
                 <div className="flex items-center space-x-8 border-t border-gray-200 pt-4">
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">1,234</p>
+                    <p className="text-2xl font-bold text-gray-900">{posts.length}</p>
                     <p className="text-sm text-gray-600">Posts</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">5.6K</p>
+                    <p className="text-2xl font-bold text-gray-900">{user._count?.friendOf ?? 0}</p>
                     <p className="text-sm text-gray-600">Followers</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-2xl font-bold text-gray-900">892</p>
+                    <p className="text-2xl font-bold text-gray-900">{user._count?.friends ?? 0}</p>
                     <p className="text-sm text-gray-600">Following</p>
                   </div>
                 </div>
@@ -256,20 +334,17 @@ export default function ProfilePage() {
             <div className="bg-white border-b border-gray-200 sticky top-16 z-10">
               <div className="max-w-4xl mx-auto px-6">
                 <div className="flex space-x-8">
-                  {tabs.map((tab) => (
-                    <button
-                      key={tab.id}
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`py-4 px-2 border-b-2 font-medium transition-colors ${
-                        activeTab === tab.id
-                          ? 'border-green-600 text-green-700'
-                          : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-                      }`}
-                    >
-                      {tab.label}
-                      <span className="ml-2 text-sm text-gray-500">({tab.count})</span>
-                    </button>
-                  ))}
+                  <button
+                    onClick={() => setActiveTab('posts')}
+                    className={`py-4 px-2 border-b-2 font-medium transition-colors ${
+                      activeTab === 'posts'
+                        ? 'border-green-600 text-green-700'
+                        : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
+                    }`}
+                  >
+                    Posts
+                    <span className="ml-2 text-sm text-gray-500">({posts.length})</span>
+                  </button>
                 </div>
               </div>
             </div>
@@ -294,34 +369,6 @@ export default function ProfilePage() {
                       <p className="text-gray-600">No posts yet</p>
                     </div>
                   )}
-                </div>
-              )}
-
-              {activeTab === 'photos' && (
-                <div className="grid grid-cols-3 gap-2">
-                  {[...Array(9)].map((_, i) => (
-                    <div key={i} className="aspect-square bg-gray-200 rounded-lg overflow-hidden">
-                      <img
-                        src={`https://images.unsplash.com/photo-${1500000000000 + i * 1000000000}?w=400`}
-                        alt={`Photo ${i + 1}`}
-                        className="w-full h-full object-cover hover:scale-105 transition-transform cursor-pointer"
-                      />
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {activeTab === 'videos' && (
-                <div className="grid grid-cols-2 gap-4">
-                  {[...Array(6)].map((_, i) => (
-                    <div key={i} className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                      <img
-                        src={`https://images.unsplash.com/photo-${1510000000000 + i * 1000000000}?w=600`}
-                        alt={`Video ${i + 1}`}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                  ))}
                 </div>
               )}
             </div>

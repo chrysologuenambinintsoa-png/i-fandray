@@ -1,29 +1,49 @@
 "use client";
 
-import React, { useState, Suspense } from 'react';
-import { useRouter } from 'next/navigation';
+import React, { useState, Suspense, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { signIn, signOut } from 'next-auth/react';
 import { Eye, EyeOff, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 function LoginPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [isLoading, setIsLoading] = useState(false);
-  const [showWelcomeMessage] = useState(false);
-  const [showResetMessage] = useState(false);
+  const [showWelcomeMessage, setShowWelcomeMessage] = useState(false);
+  const [showResetMessage, setShowResetMessage] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Check for registered parameter
+    if (searchParams.get('registered') === 'true') {
+      setShowWelcomeMessage(true);
+    }
+    // Check for reset parameter
+    if (searchParams.get('reset') === 'success') {
+      setShowResetMessage(true);
+    }
+  }, [searchParams]);
 
   const handleSocialLogin = async (provider: 'google' | 'facebook') => {
     try {
+      setError(null);
       setIsLoading(true);
       await signOut({ redirect: false });
       await new Promise((r) => setTimeout(r, 500));
       const result = await signIn(provider as any, { callbackUrl: '/feed', redirect: false });
       if (result?.url) window.location.href = result.url;
-      else router.push('/feed');
+      else {
+        // Wait for session to be established
+        await new Promise(resolve => setTimeout(resolve, 800));
+        window.location.href = '/feed';
+      }
     } catch (e) {
+      const errorMsg = e instanceof Error ? e.message : 'Social login error';
       console.error('Social login error', e);
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
@@ -31,19 +51,57 @@ function LoginPageContent() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     setIsLoading(true);
+    
     try {
-      const result = await signIn('credentials', { email: formData.email, password: formData.password, redirect: false });
-      if (result?.error) throw new Error(result.error as string);
-      router.push('/feed');
+      // Validate input
+      if (!formData.email || !formData.password) {
+        throw new Error('Please enter your email and password');
+      }
+
+      console.log('[Login] Attempting login with email:', formData.email);
+      
+      const result = await signIn('credentials', { 
+        email: formData.email, 
+        password: formData.password, 
+        redirect: false 
+      });
+
+      console.log('[Login] SignIn result:', result);
+
+      if (result?.error) {
+        console.error('[Login] Error from signIn:', result.error);
+        throw new Error(result.error as string);
+      }
+
+      if (result?.ok) {
+        console.log('[Login] Login successful');
+        
+        // Wait for session to be established - longer timeout for session propagation
+        // With JWT strategy, this should be faster
+        await new Promise(resolve => setTimeout(resolve, 800));
+        
+        console.log('[Login] Redirecting to feed...');
+        // Redirect to feed directly with a full page navigation to ensure session is loaded
+        window.location.href = '/feed';
+      } else {
+        throw new Error('Login failed. Please try again.');
+      }
     } catch (err) {
-      console.error('Login failed', err);
+      const errorMsg = err instanceof Error ? err.message : 'Login failed. Please try again.';
+      console.error('[Login] Error:', errorMsg);
+      setError(errorMsg);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    // Clear error when user starts typing
+    if (error) setError(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-green-900 flex flex-col p-4 relative overflow-hidden">
@@ -83,6 +141,12 @@ function LoginPageContent() {
                 <p className="text-blue-800 font-medium">Password reset successful!</p>
               </div>
               <p className="text-blue-700 text-sm mt-1">You can now sign in with your new password.</p>
+            </div>
+          )}
+
+          {error && (
+            <div className="bg-red-100 border border-red-400 rounded-lg p-4 mb-6">
+              <p className="text-red-800 font-medium">{error}</p>
             </div>
           )}
 

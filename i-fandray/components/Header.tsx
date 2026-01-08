@@ -46,142 +46,139 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-emerald-700 to-blue-700 text-white shadow-md">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 backdrop-blur-xl bg-opacity-95 border-b border-white/10 text-white shadow-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-20">
           {/* Logo */}
           <div className="flex items-center cursor-pointer group" onClick={() => router.push('/feed')}>
             <div className="flex items-center space-x-3">
               <div className="relative">
-                <img src="/logo.svg" alt="i-fandray Logo" className="w-10 h-10 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-cyan-400 rounded-xl blur-lg opacity-30 group-hover:opacity-60 transition-opacity duration-300"></div>
+                <img src="/logo.svg" alt="i-fandray Logo" className="w-11 h-11 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110 relative" />
               </div>
-              <span className="text-xl font-extrabold text-white drop-shadow-lg transition-all duration-300">i-fandray</span>
+              <div className="flex flex-col">
+                <span className="text-xl font-extrabold text-white transition-all duration-300 group-hover:text-emerald-300">i-fandray</span>
+                <span className="text-xs text-emerald-300 font-medium">Social Network</span>
+              </div>
             </div>
           </div>
 
           {/* Search Bar */}
-            <div className="flex-1 max-w-xl mx-8 hidden md:block">
+          <div className="flex-1 max-w-md mx-8 hidden lg:block">
             <form onSubmit={handleSearch} className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 blur"></div>
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={`${t('common.search')} i-fandray...`}
-                className="w-full pl-12 pr-4 py-3 bg-white/8 backdrop-blur-sm border border-white/10 rounded-full text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:bg-white/16 transition-all duration-300"
+                className="w-full pl-12 pr-4 py-2.5 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:bg-white/15 transition-all duration-300"
                 aria-label="Recherche i-fandray"
                 title="Recherche i-fandray"
               />
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/70 group-focus-within:text-white transition-colors duration-300" />
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 to-green-500/20 rounded-full opacity-0 group-focus-within:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-white/60 group-focus-within:text-emerald-300 transition-colors duration-300" />
             </form>
           </div>
 
           {/* Navigation Icons */}
-          <div className="flex items-center space-x-6">
+          <div className="flex items-center space-x-2">
             {/* Home */}
             <button
               onClick={() => router.push('/feed')}
-              className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
+              className="relative p-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-emerald-500/30 hover:border-emerald-400 group"
               aria-label={t('navigation.home')}
+              title={t('navigation.home')}
             >
-              <svg className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-white group-hover:text-emerald-200 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               </svg>
-              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
 
             {/* Create Post */}
             <button
               onClick={() => router.push('/post/create')}
-              className="btn-personal hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+              className="hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-600 to-cyan-600 hover:from-emerald-700 hover:to-cyan-700 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
               aria-label={t('post.createPost')}
               title={t('post.createPost')}
             >
               <Plus className="w-5 h-5" />
-              <span className="font-semibold">{t('post.createPost')}</span>
+              <span className="text-sm font-semibold">{t('post.createPost')}</span>
             </button>
 
             {/* Messages */}
             <button
               onClick={() => router.push('/messages')}
-              className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
+              className="relative p-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-cyan-500/30 hover:border-cyan-400 group"
               aria-label={t('navigation.messages')}
+              title={t('navigation.messages')}
             >
-              <MessageCircle className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" />
+              <MessageCircle className="w-5 h-5 text-white group-hover:text-cyan-200 transition-colors duration-300" />
               {messagesUnreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
                   {messagesUnreadCount > 9 ? '9+' : messagesUnreadCount}
                 </span>
               )}
-              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-teal-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
 
             {/* Friends */}
             <button
               onClick={() => router.push('/friends')}
-              className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
+              className="relative p-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-purple-500/30 hover:border-purple-400 group"
               aria-label={t('navigation.friends')}
+              title={t('navigation.friends')}
             >
-              <Users className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" />
+              <Users className="w-5 h-5 text-white group-hover:text-purple-200 transition-colors duration-300" />
               {friendRequestsCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
                   {friendRequestsCount > 9 ? '9+' : friendRequestsCount}
                 </span>
               )}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
-
-            {/* Online Friends List */}
-            <OnlineFriendsList className="hidden lg:flex" />
 
             {/* Notifications */}
             <button
               onClick={() => setShowNotifications(!showNotifications)}
-              className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
+              className="relative p-2.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-blue-500/30 hover:border-blue-400 group"
+              aria-label={t('notifications.title')}
+              title={t('notifications.title')}
             >
-              <Bell className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" />
+              <Bell className="w-5 h-5 text-white group-hover:text-blue-200 transition-colors duration-300" />
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
+                <span className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center shadow-lg animate-pulse">
                   {unreadCount > 9 ? '9+' : unreadCount}
                 </span>
               )}
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
 
             {/* Profile Dropdown */}
             <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
-                className="flex items-center space-x-2 p-1 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
+                className="flex items-center space-x-2 p-1.5 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-105 hover:bg-white/20 hover:shadow-lg group"
               >
                 {user?.avatar ? (
-                  <div className="relative">
-                    <img
-                      src={user.avatar}
-                      alt={user.username}
-                      className="w-9 h-9 rounded-full object-cover ring-2 ring-white/30 group-hover:ring-white/50 transition-all duration-300"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
-                  </div>
+                  <img
+                    src={user.avatar}
+                    alt={user.username}
+                    className="w-8 h-8 rounded-lg object-cover ring-2 ring-white/30 group-hover:ring-emerald-300/50 transition-all duration-300"
+                  />
                 ) : (
-                  <div className="relative w-9 h-9 bg-gradient-to-br from-blue-500 via-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold text-lg ring-2 ring-white/30 group-hover:ring-white/50 transition-all duration-300">
-                    {user?.firstName?.[0] || 'U'}
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+                  <div className="relative w-8 h-8 bg-gradient-to-br from-emerald-500 via-cyan-500 to-blue-500 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
+                    {user?.firstName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'U'}
                   </div>
                 )}
               </button>
 
               {showDropdown && (
-                <div className="absolute right-0 mt-3 w-56 bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-white/20 py-3 z-50">
+                <div className="absolute right-0 mt-3 w-56 bg-gradient-to-br from-slate-800 to-slate-900 backdrop-blur-xl rounded-xl shadow-2xl border border-white/20 py-2 z-50">
                   <button
                     onClick={() => {
                       router.push(`/profile/${user?.username}`);
                       setShowDropdown(false);
                     }}
-                    className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-blue-50 hover:to-green-50 flex items-center space-x-3 text-gray-900 hover:text-blue-700 transition-all duration-200 rounded-lg mx-2"
+                    className="w-full px-4 py-3 text-left hover:bg-white/10 flex items-center space-x-3 text-white hover:text-emerald-300 transition-all duration-200 rounded-lg mx-2"
                   >
-                    <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span className="font-medium">{t('navigation.profile')}</span>
@@ -192,17 +189,17 @@ export function Header() {
                       router.push('/settings');
                       setShowDropdown(false);
                     }}
-                    className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-green-50 hover:to-teal-50 flex items-center space-x-3 text-gray-900 hover:text-green-700 transition-all duration-200 rounded-lg mx-2"
+                    className="w-full px-4 py-3 text-left hover:bg-white/10 flex items-center space-x-3 text-white hover:text-cyan-300 transition-all duration-200 rounded-lg mx-2"
                   >
-                    <Settings className="w-5 h-5 text-green-500" />
+                    <Settings className="w-5 h-5 text-cyan-400" />
                     <span className="font-medium">{t('navigation.settings')}</span>
                   </button>
 
-                  <hr className="my-3 border-gray-200/50" />
+                  <hr className="my-2 border-white/10" />
 
                   <button
                     onClick={handleLogout}
-                    className="w-full px-4 py-3 text-left hover:bg-gradient-to-r hover:from-red-50 hover:to-pink-50 flex items-center space-x-3 text-red-600 hover:text-red-700 transition-all duration-200 rounded-lg mx-2"
+                    className="w-full px-4 py-3 text-left hover:bg-red-500/20 flex items-center space-x-3 text-red-400 hover:text-red-300 transition-all duration-200 rounded-lg mx-2"
                   >
                     <LogOut className="w-5 h-5" />
                     <span className="font-medium">{t('auth.logout')}</span>

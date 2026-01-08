@@ -15,10 +15,18 @@ export async function POST(request: NextRequest) {
       gender,
     } = body;
 
-    // Validation
-    if (!firstName || !lastName || !username || !email || !password) {
+    // Detailed validation with specific error messages
+    const missingFields = [];
+    if (!firstName || firstName.trim() === '') missingFields.push('firstName');
+    if (!lastName || lastName.trim() === '') missingFields.push('lastName');
+    if (!username || username.trim() === '') missingFields.push('username');
+    if (!email || email.trim() === '') missingFields.push('email');
+    if (!password || password.trim() === '') missingFields.push('password');
+
+    if (missingFields.length > 0) {
+      console.error('[api/users/register] Missing fields:', missingFields, 'Body:', body);
       return NextResponse.json(
-        { error: 'First name, last name, username, email, and password are required' },
+        { error: `Missing required fields: ${missingFields.join(', ')}` },
         { status: 400 }
       );
     }

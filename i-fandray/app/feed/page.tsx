@@ -115,14 +115,16 @@ export default function FeedPage() {
   // Redirect to login if not authenticated
   useEffect(() => {
     if (!authLoading && user === null) { // Only redirect if not loading and explicitly not authenticated
-      console.log('User not authenticated, redirecting to login');
+      console.log('[Feed] User not authenticated, redirecting to login');
       router.push('/auth/login');
+    } else if (user) {
+      console.log('[Feed] User authenticated:', user.email);
     }
   }, [user, authLoading, router]);
 
   useEffect(() => {
     if (user) {
-      console.log('User authenticated, fetching posts and stories');
+      console.log('[Feed] User authenticated, fetching posts and stories');
       fetchPosts();
       fetchStories();
     }
@@ -235,20 +237,26 @@ const handlePost = (newPost: Post) => {
 
   const handleDelete = async (postId: string) => {
     try {
+      console.log('[Feed] Deleting post:', postId);
       const response = await fetch(`/api/posts/${postId}`, {
         method: 'DELETE',
       });
 
+      console.log('[Feed] Delete response status:', response.status);
+      
       if (!response.ok) {
-        throw new Error('Failed to delete post');
+        const errorData = await response.json().catch(() => ({}));
+        console.error('[Feed] Delete error response:', errorData);
+        throw new Error(errorData.error || 'Failed to delete post');
       }
 
       // Remove post from local state
+      console.log('[Feed] Removing post from local state');
       setPosts(posts.filter(p => p.id !== postId));
       toast.success('Post deleted successfully!');
     } catch (error) {
-      console.error('Error deleting post:', error);
-      toast.error('Failed to delete post');
+      console.error('[Feed] Error deleting post:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to delete post');
     }
   };
 
@@ -328,70 +336,108 @@ const handlePost = (newPost: Post) => {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900">
       <Header />
 
-      <div className="flex pt-16">
+      <div className="flex pt-20">
         <Sidebar currentPage="feed" />
 
-        <main className="flex-1 lg:ml-64">
-          <div className="max-w-2xl mx-auto px-4 py-6">
-            {/* Stories */}
-            <StoryTray stories={stories} onCreateStory={handleCreateStory} onViewStory={handleViewStory} />
-
-            {/* Create Post */}
-            <CreatePost onPost={handlePost} />
-
-            {/* Friend Suggestions */}
-            <Suspense fallback={<div className="flex items-center justify-center py-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div></div>}>
-              <FriendSuggestionsCard />
-            </Suspense>
-
-            {/* Online Friends */}
-            <div className="bg-card rounded-lg shadow-sm p-4 mb-4">
-              <OnlineFriendsList />
+        <main className="flex-1 lg:ml-64 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-3xl mx-auto py-8">
+            {/* Stories Section */}
+            <div className="mb-8">
+              <StoryTray stories={stories} onCreateStory={handleCreateStory} onViewStory={handleViewStory} />
             </div>
 
-            {/* Suggestions */}
-            <Suspense fallback={<div className="flex items-center justify-center py-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div></div>}>
-              <SuggestionsCard />
-            </Suspense>
+            {/* Create Post Section */}
+            <div className="mb-8">
+              <CreatePost onPost={handlePost} />
+            </div>
 
-            {/* Discover Pages */}
-            <Suspense fallback={<div className="flex items-center justify-center py-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-600"></div></div>}>
-              <DiscoverPagesCard />
-            </Suspense>
-
-            {/* Discover Groups */}
-            <Suspense fallback={<div className="flex items-center justify-center py-4"><div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-600"></div></div>}>
-              <DiscoverGroupsCard />
-            </Suspense>
-
-            {/* Welcome Tips for New Users */}
-            <WelcomeTips />
-
-            {/* Posts Feed */}
-            <div className="space-y-6">
-              {isLoading ? (
-                <div className="flex items-center justify-center py-12">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
+            {/* Main Content Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Posts Feed - Main Column */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Posts Feed */}
+                <div>
+                  {isLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="relative w-12 h-12">
+                        <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full opacity-20 blur animate-pulse"></div>
+                        <div className="absolute inset-0 animate-spin">
+                          <div className="h-full w-full border-4 border-transparent border-t-emerald-500 border-r-cyan-500 rounded-full"></div>
+                        </div>
+                      </div>
+                    </div>
+                  ) : posts.length === 0 ? (
+                    <div className="text-center py-12 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10">
+                      <svg className="mx-auto h-12 w-12 text-white/20 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4" />
+                      </svg>
+                      <p className="text-white/60 font-medium">No posts yet. Be the first to share something!</p>
+                    </div>
+                  ) : (
+                    posts.map((post) => (
+                      <PostCard
+                        key={post.id}
+                        post={post}
+                        onLike={() => handleLike(post.id)}
+                        onComment={() => handleComment(post.id)}
+                        onShare={(postId, type) => handleShare(postId, type)}
+                        onDelete={handleDelete}
+                      />
+                    ))
+                  )}
                 </div>
-              ) : posts.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500">No posts yet. Be the first to share something!</p>
+              </div>
+
+              {/* Sidebar Cards */}
+              <div className="hidden lg:flex flex-col space-y-6">
+                {/* Friend Suggestions */}
+                <Suspense fallback={
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 h-64 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
+                  </div>
+                }>
+                  <FriendSuggestionsCard />
+                </Suspense>
+
+                {/* Online Friends */}
+                <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4">
+                  <h3 className="text-white font-semibold mb-4">Online Now</h3>
+                  <OnlineFriendsList />
                 </div>
-              ) : (
-                posts.map((post) => (
-                  <PostCard
-                    key={post.id}
-                    post={post}
-                    onLike={() => handleLike(post.id)}
-                    onComment={() => handleComment(post.id)}
-                    onShare={(postId, type) => handleShare(postId, type)}
-                    onDelete={handleDelete}
-                  />
-                ))
-              )}
+
+                {/* Suggestions */}
+                <Suspense fallback={
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 h-40 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-500"></div>
+                  </div>
+                }>
+                  <SuggestionsCard />
+                </Suspense>
+
+                {/* Discover Pages */}
+                <Suspense fallback={
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 h-40 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+                  </div>
+                }>
+                  <DiscoverPagesCard />
+                </Suspense>
+
+                {/* Discover Groups */}
+                <Suspense fallback={
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl border border-white/10 p-4 h-40 flex items-center justify-center">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500"></div>
+                  </div>
+                }>
+                  <DiscoverGroupsCard />
+                </Suspense>
+
+                {/* Welcome Tips */}
+                <WelcomeTips />
+              </div>
             </div>
           </div>
         </main>

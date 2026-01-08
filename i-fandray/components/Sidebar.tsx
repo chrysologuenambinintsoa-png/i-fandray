@@ -152,7 +152,7 @@ export function Sidebar({ currentPage = 'home' }: SidebarProps) {
           ) : (
             <div className="relative">
               <div className="w-14 h-14 bg-gradient-to-br from-blue-500 via-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold text-xl ring-3 ring-white/30 group-hover:ring-white/50 transition-all duration-500 relative z-10">
-                {user?.firstName?.[0] || 'U'}
+                {user?.firstName?.[0]?.toUpperCase() || user?.username?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-500"></div>
             </div>

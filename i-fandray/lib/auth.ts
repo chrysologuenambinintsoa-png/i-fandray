@@ -29,6 +29,7 @@ declare module 'next-auth' {
 declare module 'next-auth/jwt' {
   interface JWT {
     id: string;
+    email?: string;
     firstName?: string;
     lastName?: string;
     username?: string;
@@ -100,26 +101,39 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
+          console.error('[CredentialsProvider] Missing email or password');
           throw new Error('Email and password are required');
         }
 
         try {
+          console.log('[CredentialsProvider] Looking for user with email:', credentials.email);
+          
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
           });
 
           if (!user) {
+            console.error('[CredentialsProvider] No user found with email:', credentials.email);
             throw new Error('No account found with this email address');
           }
 
+          console.log('[CredentialsProvider] User found:', user.id);
+
           if (!user.password) {
+            console.error('[CredentialsProvider] User has no password (social login only):', user.id);
             throw new Error('This account uses social login. Please use Google or Facebook to sign in.');
           }
 
+          console.log('[CredentialsProvider] Comparing passwords for user:', user.id);
+          
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          
           if (!isPasswordValid) {
+            console.error('[CredentialsProvider] Invalid password for user:', user.id);
             throw new Error('Invalid password');
           }
+
+          console.log('[CredentialsProvider] Login successful for user:', user.id);
 
           return {
             id: user.id,
@@ -138,7 +152,7 @@ export const authOptions: NextAuthOptions = {
     }),
   ],
   session: {
-    strategy: 'database',
+    strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 days
     updateAge: 24 * 60 * 60, // 24 hours
   },
@@ -156,6 +170,7 @@ export const authOptions: NextAuthOptions = {
             user.email = `facebook-${account.providerAccountId}@temp.local`;
           } else if (!user.email) {
             // OAuth user has no email for provider
+            console.error('[auth][signIn] OAuth user has no email');
             return false;
           }
 
@@ -193,23 +208,27 @@ export const authOptions: NextAuthOptions = {
           user.username = username;
 
           // OAuth user data prepared
+          console.log('[auth][signIn] OAuth signin successful for:', user.email);
 
           return true;
         }
 
         // For credentials provider, just return true
+        console.log('[auth][signIn] Credentials signin successful for:', user.email);
         return true;
       } catch (err: any) {
-        // Ensure we log full error and return a safe redirect string
+        // Ensure we log full error and return false instead of redirect
         console.error('[auth][signIn] error:', err);
-        const message = (err && (err.message || String(err))) || 'Callback';
-        return `/auth/error?error=${encodeURIComponent(message)}`;
+        return false;
       }
     },
 
     async jwt({ token, user, account }) {
+      // Quand l'utilisateur se connecte, ajouter les infos au token
       if (user) {
+        console.log('[auth][jwt] Adding user to token:', user.id);
         token.id = user.id;
+        token.email = user.email;
         token.firstName = user.firstName;
         token.lastName = user.lastName;
         token.username = user.username;
@@ -218,8 +237,11 @@ export const authOptions: NextAuthOptions = {
     },
 
     async session({ session, token }) {
-      if (token) {
+      // Ajouter les infos du token à la session
+      if (session?.user && token) {
+        console.log('[auth][session] Adding token data to session:', token.email);
         session.user.id = token.id;
+        session.user.email = token.email;
         session.user.firstName = token.firstName;
         session.user.lastName = token.lastName;
         session.user.username = token.username;
@@ -228,10 +250,11 @@ export const authOptions: NextAuthOptions = {
     },
 
     async redirect({ url, baseUrl }) {
-      // Redirect to home page which will handle the proper redirection based on auth status
+      // Redirect based on URL
       if (url.startsWith('/')) return `${baseUrl}${url}`;
       if (new URL(url).origin === baseUrl) return url;
-      return baseUrl; // Redirect to home page instead of /feed directly
+      // Default redirect to /feed for authenticated users
+      return `${baseUrl}/feed`;
     },
   },
   pages: {

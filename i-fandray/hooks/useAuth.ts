@@ -25,6 +25,15 @@ export function useAuth() {
     }
   };
 
+  // Log auth status for debugging
+  if (status === 'loading') {
+    console.log('[useAuth] Session is loading...');
+  } else if (session?.user) {
+    console.log('[useAuth] User authenticated:', session.user.email);
+  } else {
+    console.log('[useAuth] No user session found');
+  }
+
   return {
     user: session?.user as User | null,
     isAuthenticated: !!session?.user,

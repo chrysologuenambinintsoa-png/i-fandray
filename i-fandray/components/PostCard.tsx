@@ -99,11 +99,20 @@ export function PostCard({
     const ok = confirm('Supprimer cette publication ? Cette action est irréversible.');
     if (!ok) return;
     try {
+      console.log('[PostCard] Deleting post:', post.id);
       const res = await fetch(`/api/posts/${post.id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Failed to delete');
+      console.log('[PostCard] Delete response status:', res.status);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('[PostCard] Delete error response:', errorData);
+        throw new Error(errorData.error || 'Failed to delete');
+      }
+      
+      console.log('[PostCard] Post deleted successfully');
       onDelete?.(post.id);
     } catch (err) {
-      console.error('Delete failed', err);
+      console.error('[PostCard] Delete failed', err);
       alert('Impossible de supprimer la publication.');
     }
   };
@@ -160,14 +169,16 @@ export function PostCard({
           ) : (
             <div className="relative">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold ring-2 ring-blue-500/30 group-hover:ring-blue-500/60 transition-all duration-300">
-                {post.author?.firstName?.[0] ?? 'U'}
+                {post.author?.firstName?.[0]?.toUpperCase() || post.author?.username?.[0]?.toUpperCase() || 'U'}
               </div>
               <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-md"></div>
             </div>
           )}
           <div>
             <p className="font-semibold text-card-foreground group-hover:text-blue-600 transition-colors duration-300">
-              {post.author?.firstName} {post.author?.lastName}
+              {post.author?.firstName && post.author?.lastName 
+                ? `${post.author.firstName} ${post.author.lastName}` 
+                : post.author?.username || 'Unknown User'}
             </p>
             <p className="text-sm text-muted-foreground group-hover:text-green-600 transition-colors duration-300">{formatDate(post.createdAt)}</p>
           </div>
@@ -285,62 +296,65 @@ export function PostCard({
       </div>
 
       {/* Post Actions */}
-      <div className="px-4 py-2 border-t border-border">
-        <ReactionButton
-          reactions={reactions}
-          selectedReaction={selectedReaction}
-          onReaction={handleReaction}
-          showReactions={showReactions}
-          onToggleReactions={handleLike}
-        />
-
-        <div className="flex items-center justify-around mt-4">
-          <button
-            onClick={handleLike}
-            className={cn(
-              'flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg border border-white/10',
-              selectedReaction
-                ? 'bg-gradient-to-r from-green-500/30 via-blue-500/30 to-teal-500/30 text-white backdrop-blur-sm ring-2 ring-green-500/50'
-                : 'bg-white/10 backdrop-blur-sm text-white/80 hover:bg-gradient-to-r hover:from-blue-500/20 hover:via-green-500/20 hover:to-teal-500/20 hover:text-white'
-            )}
-          >
-            {selectedReaction ? (
-              <span className="text-lg animate-bounce">{selectedReaction}</span>
-            ) : (
-              <ThumbsUp className="w-5 h-5 group-hover:text-blue-300 transition-colors duration-300" />
-            )}
-            <span className="text-sm font-semibold">
-              {selectedReaction ? t('post.reacted') : t('post.like')}
-            </span>
-          </button>
+      <div className="px-4 py-2 border-t border-border relative z-0">
+        <div className="flex items-center justify-around relative z-10">
+          <div className="relative">
+            <button
+              onClick={handleLike}
+              className={cn(
+                'flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg border border-white/10',
+                selectedReaction
+                  ? 'bg-gradient-to-r from-green-500/30 via-blue-500/30 to-teal-500/30 text-white backdrop-blur-sm ring-2 ring-green-500/50'
+                  : 'bg-white/10 backdrop-blur-sm text-white hover:bg-gradient-to-r hover:from-blue-500/20 hover:via-green-500/20 hover:to-teal-500/20'
+              )}
+            >
+              {selectedReaction ? (
+                <span className="text-lg animate-bounce">{selectedReaction}</span>
+              ) : (
+                <ThumbsUp className="w-5 h-5 group-hover:text-blue-300 transition-colors duration-300" />
+              )}
+              <span className="text-sm font-semibold text-white">
+                {selectedReaction ? t('post.reacted') : t('post.like')}
+              </span>
+            </button>
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50">
+              <ReactionButton
+                reactions={reactions}
+                selectedReaction={selectedReaction}
+                onReaction={handleReaction}
+                showReactions={showReactions}
+                onToggleReactions={handleLike}
+              />
+            </div>
+          </div>
 
           <button
             onClick={handleComment}
-            className="flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 bg-white/10 backdrop-blur-sm text-white/80 hover:bg-gradient-to-r hover:from-green-500/20 hover:via-teal-500/20 hover:to-blue-500/20 hover:text-white shadow-lg hover:shadow-xl border border-white/10"
+            className="flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 bg-white/10 backdrop-blur-sm text-white hover:bg-gradient-to-r hover:from-green-500/20 hover:via-teal-500/20 hover:to-blue-500/20 shadow-lg hover:shadow-xl border border-white/10"
           >
             <MessageCircle className="w-5 h-5 group-hover:text-green-300 transition-colors duration-300" />
-            <span className="text-sm font-semibold">Comment</span>
+            <span className="text-sm font-semibold text-white">Comment</span>
           </button>
 
-          <div className="relative">
+          <div className="relative z-10">
             <button
               onClick={() => setShowShareOptions(!showShareOptions)}
-              className="flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 bg-white/10 backdrop-blur-sm text-white/80 hover:bg-gradient-to-r hover:from-teal-500/20 hover:via-blue-500/20 hover:to-indigo-500/20 hover:text-white shadow-lg hover:shadow-xl border border-white/10"
+              className="flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 bg-white/10 backdrop-blur-sm text-white hover:bg-gradient-to-r hover:from-teal-500/20 hover:via-blue-500/20 hover:to-indigo-500/20 shadow-lg hover:shadow-xl border border-white/10"
             >
               <Share2 className="w-5 h-5 group-hover:text-teal-300 transition-colors duration-300" />
-              <span className="text-sm font-semibold">Share</span>
+              <span className="text-sm font-semibold text-white">Share</span>
             </button>
             {showShareOptions && (
-              <div className="absolute left-1/2 transform -translate-x-1/2 mt-1 w-48 card py-1 z-50">
+              <div className="absolute left-1/2 transform -translate-x-1/2 mt-1 w-48 card py-1 z-50 bg-white/95 backdrop-blur-sm border border-white/20">
                 <button
                   onClick={() => { setShowShareOptions(false); onShare?.(post.id, 'message'); }}
-                  className="w-full text-left px-4 py-2 hover:bg-muted"
+                  className="w-full text-left px-4 py-2 text-gray-800 hover:bg-emerald-100 transition-colors duration-200"
                 >
                   Partager en message
                 </button>
                 <button
                   onClick={() => { setShowShareOptions(false); onShare?.(post.id, 'group'); }}
-                  className="w-full text-left px-4 py-2 hover:bg-muted"
+                  className="w-full text-left px-4 py-2 text-gray-800 hover:bg-blue-100 transition-colors duration-200"
                 >
                   Partager dans un groupe
                 </button>
