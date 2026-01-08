@@ -14,6 +14,7 @@ import { Post, Story } from '@/types';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/components/TranslationProvider';
 import toast from 'react-hot-toast';
+import { uploadToCloudinary } from '@/lib/upload';
 
 // Lazy load heavy components
 const FriendSuggestionsCard = lazy(() => import('@/components/FriendSuggestionsCard').then(mod => ({ default: mod.FriendSuggestionsCard })));
@@ -269,23 +270,10 @@ const handlePost = (newPost: Post) => {
       let mediaType: 'text' | 'image' | 'video' = 'text';
 
       if (storyUploadFile) {
-        // Upload file first
-        const formData = new FormData();
-        formData.append('file', storyUploadFile);
-
-        const uploadResponse = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-        });
-
-        if (!uploadResponse.ok) {
-          throw new Error('Failed to upload file');
-        }
-
-        const uploadData = await uploadResponse.json();
-        mediaUrl = uploadData.url;
-        mediaType = uploadData.type;
+        // Upload file to Cloudinary
+        const uploadData = await uploadToCloudinary(storyUploadFile, { folder: 'stories' });
+        mediaUrl = uploadData.secure_url || uploadData.url;
+        mediaType = storyUploadFile.type.startsWith('video/') ? 'video' : 'image';
       } else {
         // For text stories, we can create a simple text-based story
         mediaUrl = storyText;

@@ -85,9 +85,7 @@ npm install framer-motion
 ## Support
 
 Pour toute question:
-- Documentation: /help
-- Email: support@ifandray.com
-
+Consultez le `README.md` principal pour la configuration des variables d'environnement, les clés Cloudinary/NextAuth et le guide de déploiement (Vercel).
 ---
 
 Version 2.0.0 - Janvier 2026

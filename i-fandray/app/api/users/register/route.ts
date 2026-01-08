@@ -81,7 +81,9 @@ export async function POST(request: NextRequest) {
       { status: 201 }
     );
   } catch (error) {
-    
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    // Log the error detail to help debugging (show message in non-production)
+    console.error('[api/users/register] error:', error);
+    const message = process.env.NODE_ENV === 'production' ? 'Internal server error' : (error && (error.message || String(error)));
+    return NextResponse.json({ error: message || 'Internal server error' }, { status: 500 });
   }
 }

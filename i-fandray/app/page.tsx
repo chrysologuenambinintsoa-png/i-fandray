@@ -17,6 +17,16 @@ export default function Home() {
     const timer = setTimeout(() => {
       setShowSplash(false);
       if (session?.user) {
+        try {
+          const seen = localStorage.getItem('seenWelcome');
+          if (!seen || seen !== 'true') {
+            router.push('/welcome');
+            return;
+          }
+        } catch (e) {
+          // ignore localStorage errors
+        }
+
         router.push('/feed');
       } else {
         router.push('/auth/login');

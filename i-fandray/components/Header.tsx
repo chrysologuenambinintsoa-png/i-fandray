@@ -46,7 +46,7 @@ export function Header() {
   };
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-40 header-glass border-b border-white/10">
+    <header className="fixed top-0 left-0 right-0 z-40 bg-gradient-to-r from-emerald-700 to-blue-700 text-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -54,21 +54,21 @@ export function Header() {
             <div className="flex items-center space-x-3">
               <div className="relative">
                 <img src="/logo.svg" alt="i-fandray Logo" className="w-10 h-10 transition-transform duration-300 group-hover:rotate-12 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full blur-md opacity-30 group-hover:opacity-50 transition-opacity duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full blur-md opacity-20 group-hover:opacity-40 transition-opacity duration-300"></div>
               </div>
-              <span className="text-xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-green-400 to-teal-400 group-hover:from-blue-300 group-hover:via-green-300 group-hover:to-teal-300 transition-all duration-300">i-fandray</span>
+              <span className="text-xl font-extrabold text-white drop-shadow-lg transition-all duration-300">i-fandray</span>
             </div>
           </div>
 
           {/* Search Bar */}
-          <div className="flex-1 max-w-xl mx-8 hidden md:block">
+            <div className="flex-1 max-w-xl mx-8 hidden md:block">
             <form onSubmit={handleSearch} className="relative group">
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={`${t('common.search')} i-fandray...`}
-                className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-white/30 focus:bg-white/20 transition-all duration-300"
+                className="w-full pl-12 pr-4 py-3 bg-white/8 backdrop-blur-sm border border-white/10 rounded-full text-white placeholder-white/70 focus:outline-none focus:ring-2 focus:ring-emerald-300 focus:bg-white/16 transition-all duration-300"
                 aria-label="Recherche i-fandray"
                 title="Recherche i-fandray"
               />
@@ -85,16 +85,16 @@ export function Header() {
               className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
               aria-label={t('navigation.home')}
             >
-              <svg className="w-6 h-6 text-white group-hover:text-blue-300 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               </svg>
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-emerald-400 to-blue-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
             </button>
 
             {/* Create Post */}
             <button
               onClick={() => router.push('/post/create')}
-              className="btn-personal hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-green-500 hover:from-blue-600 hover:to-green-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
+              className="btn-personal hidden sm:flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600 text-white font-semibold rounded-full transition-all duration-300 transform hover:scale-105 hover:shadow-lg"
               aria-label={t('post.createPost')}
               title={t('post.createPost')}
             >
@@ -108,7 +108,7 @@ export function Header() {
               className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
               aria-label={t('navigation.messages')}
             >
-              <MessageCircle className="w-6 h-6 text-white group-hover:text-green-300 transition-colors duration-300" />
+              <MessageCircle className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" />
               {messagesUnreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
                   {messagesUnreadCount > 9 ? '9+' : messagesUnreadCount}
@@ -123,7 +123,7 @@ export function Header() {
               className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
               aria-label={t('navigation.friends')}
             >
-              <Users className="w-6 h-6 text-white group-hover:text-blue-300 transition-colors duration-300" />
+              <Users className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" />
               {friendRequestsCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
                   {friendRequestsCount > 9 ? '9+' : friendRequestsCount}
@@ -140,7 +140,7 @@ export function Header() {
               onClick={() => setShowNotifications(!showNotifications)}
               className="relative p-3 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 transition-all duration-300 transform hover:scale-110 hover:bg-white/20 hover:shadow-lg group"
             >
-              <Bell className="w-6 h-6 text-white group-hover:text-teal-300 transition-colors duration-300" />
+              <Bell className="w-6 h-6 text-white group-hover:text-emerald-200 transition-colors duration-300" />
               {unreadCount > 0 && (
                 <span className="absolute -top-1 -right-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-pulse">
                   {unreadCount > 9 ? '9+' : unreadCount}

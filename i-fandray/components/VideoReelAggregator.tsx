@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Video, Play, Heart, MessageCircle, Share2, TrendingUp, Clock, Eye, Plus, Camera, Film, Sparkles, Upload } from 'lucide-react';
 import { formatDate } from '@/lib/utils';
 import { useTranslation } from '@/components/TranslationProvider';
+import { uploadToCloudinary } from '@/lib/upload';
 
 interface VideoReel {
   id: string;
@@ -184,22 +185,8 @@ export function VideoReelAggregator() {
       setIsCreating(true);
       setCreateError(null);
 
-      // First, upload the video file
-      const formData = new FormData();
-      formData.append('file', selectedFile);
-      formData.append('type', 'video');
-
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload video');
-      }
-
-      const uploadData = await uploadResponse.json();
+      // Upload video to Cloudinary
+      const uploadData = await uploadToCloudinary(selectedFile, { folder: 'videos' });
 
       // Then create the video record
       const videoResponse = await fetch('/api/videos', {
@@ -210,8 +197,8 @@ export function VideoReelAggregator() {
         body: JSON.stringify({
           title: reelData.title,
           description: reelData.description,
-          videoUrl: uploadData.url,
-          thumbnailUrl: uploadData.thumbnailUrl || uploadData.url, // Use video URL as fallback
+          videoUrl: uploadData.secure_url || uploadData.url,
+          thumbnailUrl: uploadData.thumbnail_url || uploadData.secure_url || uploadData.url,
           duration: 0, // TODO: Extract duration from video file
           category: reelData.category,
         }),

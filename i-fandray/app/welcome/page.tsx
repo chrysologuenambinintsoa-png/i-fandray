@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { CheckCircle, ArrowRight, User, MessageCircle, Image, Users, Settings, Star } from 'lucide-react';
+import { Header } from '@/components/Header';
+import { Sidebar } from '@/components/Sidebar';
 import Link from 'next/link';
 
 export default function WelcomePage() {
@@ -60,34 +62,33 @@ export default function WelcomePage() {
     if (currentStep < steps.length - 1) {
       setCurrentStep(currentStep + 1);
     } else {
+      try {
+        localStorage.setItem('seenWelcome', 'true');
+      } catch (e) {
+        // ignore
+      }
       router.push('/feed');
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-green-900 via-green-700 to-blue-900">
-      {/* Header */}
-      <div className="bg-white/10 backdrop-blur-sm border-b border-white/20">
-        <div className="max-w-4xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="flex items-center space-x-1">
-                <div className="w-8 h-8 bg-white rounded-lg transform rotate-6"></div>
-                <div className="w-8 h-8 bg-blue-400 rounded-lg transform -rotate-6"></div>
-              </div>
-              <h1 className="text-2xl font-bold text-white">i-fandray</h1>
-            </div>
-            <Link
-              href="/feed"
-              className="text-white/80 hover:text-white transition-colors text-sm"
-            >
-              Aller au fil d&apos;actualité →
-            </Link>
-          </div>
-        </div>
-      </div>
+  const handleMarkSeenAndNavigate = (link: string) => {
+    try {
+      localStorage.setItem('seenWelcome', 'true');
+    } catch (e) {
+      // ignore
+    }
+    router.push(link);
+  };
 
-      <div className="max-w-4xl mx-auto px-4 py-8">
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+
+      <div className="flex pt-16">
+        <Sidebar currentPage="welcome" />
+
+        <main className="flex-1 lg:ml-64">
+          <div className="max-w-2xl mx-auto px-4 py-6">
         {/* Welcome Section */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-6 shadow-lg">
@@ -135,25 +136,25 @@ export default function WelcomePage() {
           </div>
 
           <div className="flex justify-center">
-            <Link
-              href={steps[currentStep].link}
-              className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transition-colors"
-            >
-              {steps[currentStep].action}
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
-          </div>
-        </div>
-
-        {/* All Steps Overview */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-          {steps.map((step, index) => (
             <div
               key={index}
               onClick={() => handleStepClick(index)}
               className={`bg-white/10 backdrop-blur-sm rounded-xl p-6 cursor-pointer transition-all hover:bg-white/20 ${
                 index === currentStep ? 'ring-2 ring-white' : ''
               }`}
+            >
+              <div className="flex items-center space-x-3 mb-3">
+                {React.createElement(step.icon, {
+                  className: "w-6 h-6 text-white"
+                })}
+                <h3 className="text-lg font-semibold text-white">
+                  {step.title}
+                </h3>
+              </div>
+              <p className="text-white/80 text-sm">
+                {step.description}
+              </p>
+            </div>
             >
               <div className="flex items-center space-x-3 mb-3">
                 {React.createElement(step.icon, {
@@ -190,7 +191,7 @@ export default function WelcomePage() {
         </div>
 
         {/* Tips Section */}
-        <div className="mt-12 bg-white/10 backdrop-blur-sm rounded-xl p-6">
+        <div className="mt-12 bg-card rounded-xl p-6">
           <div className="flex items-center space-x-2 mb-4">
             <Star className="w-5 h-5 text-yellow-400" />
             <h3 className="text-lg font-semibold text-white">Conseils pour bien débuter</h3>
@@ -214,6 +215,8 @@ export default function WelcomePage() {
             </div>
           </div>
         </div>
+          </div>
+        </main>
       </div>
     </div>
   );

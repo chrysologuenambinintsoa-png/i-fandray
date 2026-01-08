@@ -9,6 +9,7 @@ function VerifyCodePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const mobile = searchParams.get('mobile');
+  const email = searchParams.get('email');
 
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
@@ -18,10 +19,10 @@ function VerifyCodePageContent() {
   const [countdown, setCountdown] = useState(0);
 
   useEffect(() => {
-    if (!mobile) {
+    if (!mobile && !email) {
       router.push('/auth/forgot-password');
     }
-  }, [mobile, router]);
+  }, [mobile, email, router]);
 
   useEffect(() => {
     if (countdown > 0) {
@@ -38,12 +39,13 @@ function VerifyCodePageContent() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/auth/verify-reset-token', {
+      const endpoint = mobile ? '/api/auth/verify-sms' : '/api/auth/verify-email-code';
+      const payload = mobile ? { mobile, code } : { email, code };
+
+      const response = await fetch(endpoint, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mobile, code }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
 
       const data = await response.json();
@@ -53,9 +55,10 @@ function VerifyCodePageContent() {
       }
 
       setSuccess(true);
-      // Redirect to reset password page with mobile and code
+      // Redirect to reset password page with mobile or email and code
       setTimeout(() => {
-        router.push(`/auth/reset-password?mobile=${encodeURIComponent(mobile!)}&code=${code}`);
+        if (mobile) router.push(`/auth/reset-password?mobile=${encodeURIComponent(mobile!)}&code=${code}`);
+        else router.push(`/auth/reset-password?email=${encodeURIComponent(email!)}&code=${code}`);
       }, 2000);
 
     } catch (err: any) {
@@ -70,19 +73,25 @@ function VerifyCodePageContent() {
     setCountdown(60); // 60 seconds cooldown
 
     try {
-      await fetch('/api/auth/forgot-password', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ mobile }),
-      });
+      if (mobile) {
+        await fetch('/api/auth/send-sms', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mobile }),
+        });
+      } else if (email) {
+        await fetch('/api/auth/send-reset-code-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+      }
     } catch (error) {
       console.error('Failed to resend code:', error);
     }
   };
 
-  if (!mobile) {
+  if (!mobile && !email) {
     return null; // Will redirect
   }
 
@@ -121,10 +130,10 @@ function VerifyCodePageContent() {
 
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-6">
-            <Smartphone className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+            <Smartphone className="w-12 h-12 text-emerald-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-gray-900 mb-2">Enter Verification Code</h1>
             <p className="text-gray-600">
-              We&apos;ve sent a 6-digit code to <strong>{mobile}</strong>
+              We&apos;ve sent a 6-digit code to <strong>{mobile ?? email}</strong>
             </p>
           </div>
 
@@ -141,7 +150,7 @@ function VerifyCodePageContent() {
                   const value = e.target.value.replace(/\D/g, '').slice(0, 6);
                   setCode(value);
                 }}
-                className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 text-center text-2xl font-mono tracking-widest border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                 placeholder="000000"
                 maxLength={6}
                 required
@@ -157,7 +166,7 @@ function VerifyCodePageContent() {
             <button
               type="submit"
               disabled={isLoading || code.length !== 6}
-              className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="w-full bg-emerald-600 text-white py-3 px-4 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isLoading ? 'Verifying...' : 'Verify Code'}
             </button>

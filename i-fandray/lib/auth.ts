@@ -144,60 +144,67 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      // SignIn callback triggered
+      try {
+        // SignIn callback triggered
 
-      // For OAuth providers, ensure user data is properly formatted
-      if (account?.provider === 'google' || account?.provider === 'facebook') {
-        // For Facebook, email might not be available, so we allow sign in anyway
-        if (account.provider === 'facebook' && !user.email) {
-          // Facebook login without email - allowing sign in with generated email
-          // Generate a temporary email using Facebook ID
-          user.email = `facebook-${account.providerAccountId}@temp.local`;
-        } else if (!user.email) {
-          // OAuth user has no email for provider
-          return false;
-        }
-
-        // Ensure we have firstName and lastName
-        if (!user.firstName || !user.lastName) {
-          const nameParts = user.name?.split(' ') ?? [];
-          user.firstName = user.firstName ?? nameParts[0] ?? '';
-          user.lastName = user.lastName ?? nameParts.slice(1).join(' ') ?? '';
-        }
-
-        // Generate unique username if not provided or if it already exists
-        if (!user.username) {
-          const baseUsername = user.email?.split('@')[0] ?? user.name?.toLowerCase().replace(/\s+/g, '') ?? 'user';
-          user.username = baseUsername;
-        }
-
-        // Check if username exists and make it unique
-        let username = user.username;
-        let counter = 1;
-        while (true) {
-          try {
-            const existingUser = await prisma.user.findUnique({
-              where: { username }
-            });
-            if (!existingUser) break;
-            username = `${user.username}${counter}`;
-            counter++;
-          } catch (error) {
-            // Error checking username uniqueness
-            // If we can't check, use a timestamp-based username
-            username = `${user.username}_${Date.now()}`;
-            break;
+        // For OAuth providers, ensure user data is properly formatted
+        if (account?.provider === 'google' || account?.provider === 'facebook') {
+          // For Facebook, email might not be available, so we allow sign in anyway
+          if (account.provider === 'facebook' && !user.email) {
+            // Facebook login without email - allowing sign in with generated email
+            // Generate a temporary email using Facebook ID
+            user.email = `facebook-${account.providerAccountId}@temp.local`;
+          } else if (!user.email) {
+            // OAuth user has no email for provider
+            return false;
           }
+
+          // Ensure we have firstName and lastName
+          if (!user.firstName || !user.lastName) {
+            const nameParts = user.name?.split(' ') ?? [];
+            user.firstName = user.firstName ?? nameParts[0] ?? '';
+            user.lastName = user.lastName ?? nameParts.slice(1).join(' ') ?? '';
+          }
+
+          // Generate unique username if not provided or if it already exists
+          if (!user.username) {
+            const baseUsername = user.email?.split('@')[0] ?? user.name?.toLowerCase().replace(/\s+/g, '') ?? 'user';
+            user.username = baseUsername;
+          }
+
+          // Check if username exists and make it unique
+          let username = user.username;
+          let counter = 1;
+          while (true) {
+            try {
+              const existingUser = await prisma.user.findUnique({
+                where: { username }
+              });
+              if (!existingUser) break;
+              username = `${user.username}${counter}`;
+              counter++;
+            } catch (err) {
+              // Error checking username uniqueness
+              // If we can't check, use a timestamp-based username
+              username = `${user.username}_${Date.now()}`;
+              break;
+            }
+          }
+          user.username = username;
+
+          // OAuth user data prepared
+
+          return true;
         }
-        user.username = username;
 
-        // OAuth user data prepared
-
+        // For credentials provider, just return true
         return true;
+      } catch (err: any) {
+        // Ensure we log full error and return a safe redirect string
+        console.error('[auth][signIn] error:', err);
+        const message = (err && (err.message || String(err))) || 'Callback';
+        return `/auth/error?error=${encodeURIComponent(message)}`;
       }
-
-      // For credentials provider, just return true
-      return true;
     },
 
     async jwt({ token, user, account }) {

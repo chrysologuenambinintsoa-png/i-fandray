@@ -8,5 +8,10 @@
     "build": "npm --prefix i-fandray run build",
     "start": "npm --prefix i-fandray run start",
     "test": "npm --prefix i-fandray run test"
+  },
+  "dependencies": {
+    "@prisma/client": "^7.2.0",
+    "bcryptjs": "^3.0.3",
+    "dotenv": "^17.2.3"
   }
 }

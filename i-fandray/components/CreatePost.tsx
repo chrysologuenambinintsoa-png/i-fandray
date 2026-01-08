@@ -6,6 +6,7 @@ import { Smile, MapPin, Tag, X, AlertCircle, Upload } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useTranslation } from '@/components/TranslationProvider';
 import toast from 'react-hot-toast';
+import { uploadToCloudinary } from '@/lib/upload';
 import { Post } from '@/types';
 
 const MapSelector = dynamic(() => import('./MapSelector'), { ssr: false });
@@ -94,23 +95,13 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
 
     for (const file of fileArray) {
       try {
-        const formData = new FormData();
-        formData.append('file', file);
+        const result = await uploadToCloudinary(file, { folder: 'posts' });
+        // Cloudinary returns `secure_url` for the uploaded asset
+        const url = result.secure_url || result.url || result.secureUrl;
+        if (!url) throw new Error('Upload returned no URL');
 
-        const response = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData,
-          credentials: 'include',
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
-          throw new Error(errorData.error || `Upload failed: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        uploadedUrls.push(data.url);
-        uploadedTypes.push(data.type);
+        uploadedUrls.push(url);
+        uploadedTypes.push(file.type);
         toast.success(`${file.name} uploaded successfully`);
       } catch (error) {
         console.error('Error uploading file:', error);

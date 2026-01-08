@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Story } from '@/types';
 import { Plus, X, Heart } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { uploadToCloudinary } from '@/lib/upload';
 
 export default function StoriesPage() {
   const { user } = useAuth();
@@ -76,21 +77,12 @@ export default function StoriesPage() {
 
     setIsUploading(true);
     try {
-      // Upload file first
-      const formData = new FormData();
-      formData.append('file', uploadFile);
+      // Upload file to Cloudinary
+      const uploadData = await uploadToCloudinary(uploadFile, { folder: 'stories' });
+      const mediaUrl = uploadData.secure_url || uploadData.url || uploadData.secureUrl;
+      const mediaType = uploadFile.type || (uploadData.resource_type === 'video' ? 'video/mp4' : 'image/jpeg');
 
-      const uploadResponse = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file');
-      }
-
-      const uploadData = await uploadResponse.json();
+      if (!mediaUrl) throw new Error('Upload returned no URL');
 
       // Create story
       const storyResponse = await fetch('/api/stories', {
@@ -99,8 +91,8 @@ export default function StoriesPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          mediaUrl: uploadData.url,
-          mediaType: uploadData.type,
+          mediaUrl,
+          mediaType,
           duration: 5000, // 5 seconds default
         }),
       });

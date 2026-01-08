@@ -305,42 +305,78 @@ const text = t('en', 'common.loading');
 
 ## Deployment
 
-### Prerequisites
-- PostgreSQL database
-- Node.js 18+
-- Hosting platform (Vercel, Netlify, etc.)
+### Prérequis
 
-### Environment Variables
+- Base de données PostgreSQL (recommandé en production)
+- Node.js 18+
+- Plateforme d'hébergement (Vercel recommandé)
+
+### Variables d'environnement requises (exemples)
+
 ```env
-DATABASE_URL="postgresql://..."
-NEXTAUTH_SECRET="your-secret"
-NEXTAUTH_URL="https://your-domain.com"
-OPENAI_API_KEY="your-api-key"
+DATABASE_URL="postgresql://user:password@host:5432/dbname"
+NEXTAUTH_URL="https://votre-app.vercel.app"
+NEXTAUTH_SECRET="<valeur_secrète_forte>"
+
+# OAuth
+GOOGLE_CLIENT_ID="..."
+GOOGLE_CLIENT_SECRET="..."
+FACEBOOK_CLIENT_ID="..."
+FACEBOOK_CLIENT_SECRET="..."
+
+# Cloudinary (uploads)
+CLOUDINARY_CLOUD_NAME="..."
+CLOUDINARY_API_KEY="..."
+CLOUDINARY_API_SECRET="..."
+
+# Optionnel
+OPENAI_API_KEY="..."
+NEWS_API_KEY="..."
+ADMIN_API_KEY="..."
 ```
 
-### Build Steps
+### Étapes de build et déploiement
+
+1. Installer les dépendances :
+
 ```bash
-# Install dependencies
 npm install
+```
 
-# Generate Prisma client
+2. Générer le client Prisma et pousser le schéma :
+
+```bash
 npx prisma generate
-
-# Push database schema
 npx prisma db push
+```
 
-# Build the application
+3. Construire l'application :
+
+```bash
 npm run build
+```
 
-# Start production server
+4. Démarrer le serveur de production (si vous utilisez un serveur Node.js) :
+
+```bash
 npm start
 ```
 
-### Vercel Deployment
-1. Push code to GitHub
-2. Import project in Vercel
-3. Add environment variables
-4. Deploy
+### Déploiement sur Vercel (recommandé)
+
+1. Poussez votre code sur GitHub/GitLab.
+2. Importez le projet dans Vercel et liez le dépôt.
+3. Dans les Settings > Environment Variables, ajoutez les variables listées ci-dessus (utilisez les valeurs de production).
+4. Configurez la commande de build : `npm run build`.
+5. Déployez et vérifiez les logs si nécessaire.
+
+Remarques importantes :
+
+- En production, assurez-vous que `NEXTAUTH_URL` contient l'URL publique (HTTPS).
+- Utilisez PostgreSQL en production pour la fiabilité et les sauvegardes.
+- Configurez `CLOUDINARY_*` pour permettre les uploads côté client signés depuis l'API interne (`/api/uploads/signature`).
+- Pour l'API d'administration, remplacez la clé statique `ADMIN_API_KEY` par un mécanisme basé sur les rôles NextAuth si nécessaire.
+
 
 ## Troubleshooting
 

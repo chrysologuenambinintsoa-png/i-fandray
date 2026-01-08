@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { availableLocales, localeNames } from '@/lib/i18n';
+import { uploadToCloudinary } from '@/lib/upload';
 
 type SettingsTab = 'profile' | 'account' | 'privacy' | 'notifications' | 'appearance' | 'security' | 'pages' | 'about';
 
@@ -105,22 +106,9 @@ export default function SettingsPageClient() {
 
   // Upload file helper
   const uploadFile = async (file: File): Promise<string | null> => {
-    const formData = new FormData();
-    formData.append('file', file);
-
     try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formData,
-        credentials: 'include',
-      });
-
-      if (!response.ok) {
-        throw new Error('Upload failed');
-      }
-
-      const data = await response.json();
-      return data.url;
+      const result = await uploadToCloudinary(file, { folder: 'avatars' });
+      return result.secure_url || result.url || result.secureUrl || null;
     } catch (error) {
       console.error('Upload error:', error);
       throw error;

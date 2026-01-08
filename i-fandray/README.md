@@ -195,11 +195,26 @@ Before running this application, make sure you have the following installed:
    Edit `.env.local` with your configuration:
    ```env
    # Database
-   DATABASE_URL="file:./dev.db"
+   # En développement vous pouvez utiliser SQLite. En production, utilisez PostgreSQL
+   DATABASE_URL="file:./dev.db" # (dev) Remplacez par votre DATABASE_URL Postgres en production
 
    # NextAuth.js
    NEXTAUTH_SECRET="your-super-secret-key-here-change-this"
    NEXTAUTH_URL="http://localhost:3000"
+
+   # OAuth providers (Google, Facebook)
+   GOOGLE_CLIENT_ID="your-google-client-id"
+   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   FACEBOOK_CLIENT_ID="your-facebook-client-id"
+   FACEBOOK_CLIENT_SECRET="your-facebook-client-secret"
+
+   # Cloudinary (pour les uploads côté client)
+   CLOUDINARY_CLOUD_NAME="your-cloudinary-cloud-name"
+   CLOUDINARY_API_KEY="your-cloudinary-api-key"
+   CLOUDINARY_API_SECRET="your-cloudinary-api-secret"
+
+   # Admin API key (utilisé par les scripts d'administration)
+   ADMIN_API_KEY="a-secure-admin-key"
 
    # News API (Get your key from https://newsapi.org)
    NEWS_API_KEY="your-newsapi-key-here"
@@ -270,6 +285,35 @@ npm run build
 # Start production server
 npm run start
 ```
+
+## Déploiement sur Vercel (guide rapide en français)
+
+1. Poussez votre code sur GitHub/GitLab/Bitbucket.
+2. Dans Vercel, importez le projet et liez le dépôt.
+3. Configurez les variables d'environnement (Production) :
+
+```text
+NEXTAUTH_URL=https://votre-app.vercel.app
+NEXTAUTH_SECRET=<valeur_secrète_sûre>
+DATABASE_URL=postgresql://user:pass@host:5432/dbname
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+FACEBOOK_CLIENT_ID=...
+FACEBOOK_CLIENT_SECRET=...
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+ADMIN_API_KEY=...
+```
+
+4. Définissez la commande de build : `npm run build`.
+5. Déployez et vérifiez les logs sur la dashboard Vercel.
+
+Conseils :
+- Utilisez PostgreSQL en production et remplacez `DATABASE_URL` en conséquence.
+- Vérifiez que `NEXTAUTH_URL` correspond à l'URL de votre déploiement (HTTPS requis).
+- Pour les cookies NextAuth, `useSecureCookies` est activé automatiquement en production (HTTPS).
+
 
 ## 📊 Database Schema
 

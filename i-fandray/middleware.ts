@@ -88,16 +88,38 @@ export function middleware(request: NextRequest) {
 
   // 2. Rate limiting pour les routes API
   if (pathname.startsWith('/api/')) {
-    if (isRateLimited(ip)) {
-      return NextResponse.json(
-        { error: 'Too many requests. Please try again later.' },
-        {
-          status: 429,
-          headers: {
-            'Retry-After': '900', // 15 minutes en secondes
-          },
+    // Allow specific API routes to bypass rate limiting in development
+    const WHITELISTED_API_PATHS = ['/api/users/register'];
+    const isWhitelisted = WHITELISTED_API_PATHS.some((p) => pathname.startsWith(p));
+
+    // In production: always enforce rate limiting
+    if (process.env.NODE_ENV === 'production') {
+      if (isRateLimited(ip)) {
+        return NextResponse.json(
+          { error: 'Too many requests. Please try again later.' },
+          {
+            status: 429,
+            headers: {
+              'Retry-After': '900', // 15 minutes en secondes
+            },
+          }
+        );
+      }
+    } else {
+      // In non-production, skip rate limiting only for whitelisted routes
+      if (!isWhitelisted) {
+        if (isRateLimited(ip)) {
+          return NextResponse.json(
+            { error: 'Too many requests. Please try again later.' },
+            {
+              status: 429,
+              headers: {
+                'Retry-After': '900',
+              },
+            }
+          );
         }
-      );
+      }
     }
   }
 
