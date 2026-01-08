@@ -112,7 +112,6 @@ npm audit fix
 
 - **Google** : Configurez les origines autorisées
 - **Facebook** : Utilisez `https` en production
-- **GitHub** : Limitez les permissions au minimum
 
 ### 4. **Base de Données**
 

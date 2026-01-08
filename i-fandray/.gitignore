@@ -10,6 +10,7 @@ build/
 out/
 .cache/
 .parcel-cache/
+.vscode/
 
 # Fichiers d'environnement 
 .env
