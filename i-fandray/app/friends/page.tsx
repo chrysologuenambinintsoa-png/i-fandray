@@ -47,6 +47,8 @@ export default function FriendsPage() {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
+    if (status === 'loading') return; // Wait for session to load
+
     if (status === 'unauthenticated') {
       router.push('/auth/login');
       return;

@@ -38,7 +38,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ unreadCount: totalUnread });
   } catch (error) {
-    console.error('Error fetching unread messages count:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

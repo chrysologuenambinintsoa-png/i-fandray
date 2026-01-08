@@ -62,7 +62,7 @@ export async function GET(request: NextRequest) {
       hasMore: offset + limit < totalCount,
     });
   } catch (error) {
-    console.error('Error fetching notifications:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -127,7 +127,7 @@ export async function POST(request: NextRequest) {
       ...notificationData,
     });
   } catch (error) {
-    console.error('Error creating notification:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -175,7 +175,7 @@ export async function PATCH(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error updating notifications:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -208,7 +208,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error deleting notifications:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -37,11 +37,11 @@ type SettingsTab = 'profile' | 'account' | 'privacy' | 'notifications' | 'appear
 
 export default function SettingsPageClient() {
   const router = useRouter();
-  const { user, updateUser } = useAuth();
+  const { user, isLoading, updateUser } = useAuth();
   const { language, theme, setLanguage, setTheme, notifications, privacy, setNotification, setPrivacy } = useSettings();
   const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
-  const [isLoading, setIsLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
   // Account settings state
@@ -91,24 +91,12 @@ export default function SettingsPageClient() {
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverPhotoInputRef = useRef<HTMLInputElement>(null);
 
-  // Fetch connected accounts on mount
+  // Redirect to login if not authenticated
   useEffect(() => {
-    const fetchConnectedAccounts = async () => {
-      try {
-        const response = await fetch('/api/users/connected-accounts');
-        if (response.ok) {
-          const data = await response.json();
-          setConnectedAccounts(data.accounts || []);
-        }
-      } catch (error) {
-        console.error('Error fetching connected accounts:', error);
-      }
-    };
-
-    if (user) {
-      fetchConnectedAccounts();
+    if (!isLoading && user === null) {
+      router.push('/auth/login');
     }
-  }, [user]);
+  }, [user, isLoading, router]);
 
   // Handle input changes
   const handleInputChange = (field: string, value: string) => {
@@ -124,6 +112,7 @@ export default function SettingsPageClient() {
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -156,7 +145,7 @@ export default function SettingsPageClient() {
     }
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       const avatarUrl = await uploadFile(file);
       if (avatarUrl) {
         setProfileData(prev => ({ ...prev, avatar: avatarUrl }));
@@ -165,7 +154,7 @@ export default function SettingsPageClient() {
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to upload profile picture' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -187,7 +176,7 @@ export default function SettingsPageClient() {
     }
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       const coverPhotoUrl = await uploadFile(file);
       if (coverPhotoUrl) {
         setProfileData(prev => ({ ...prev, coverPhoto: coverPhotoUrl }));
@@ -196,7 +185,7 @@ export default function SettingsPageClient() {
     } catch (error) {
       setMessage({ type: 'error', text: 'Failed to upload cover photo' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -210,7 +199,7 @@ export default function SettingsPageClient() {
     }
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       setMessage(null);
 
       const response = await fetch('/api/pages', {
@@ -240,7 +229,7 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to create page' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -254,7 +243,7 @@ export default function SettingsPageClient() {
     event.preventDefault();
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       setMessage(null);
 
       const response = await fetch('/api/users/account', {
@@ -278,13 +267,13 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to update account' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
   // Handle linking OAuth account
   const handleLinkAccount = async (provider: string) => {
-    setIsLoading(true);
+    setIsUpdating(true);
     try {
       const result = await signIn(provider, { callbackUrl: '/settings' });
       if (result?.error) {
@@ -300,13 +289,13 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || `Failed to link ${provider} account` });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
   // Handle unlinking OAuth account
   const handleUnlinkAccount = async (provider: string) => {
-    setIsLoading(true);
+    setIsUpdating(true);
     try {
       const response = await fetch('/api/users/connected-accounts', {
         method: 'DELETE',
@@ -326,7 +315,7 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || `Failed to unlink ${provider} account` });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -334,7 +323,7 @@ export default function SettingsPageClient() {
     event.preventDefault();
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       setMessage(null);
 
       const response = await fetch('/api/users/profile', {
@@ -363,7 +352,7 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -382,7 +371,7 @@ export default function SettingsPageClient() {
     }
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       setMessage(null);
 
       const response = await fetch('/api/users/change-password', {
@@ -411,7 +400,7 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to change password' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -434,7 +423,7 @@ export default function SettingsPageClient() {
     }
 
     try {
-      setIsLoading(true);
+      setIsUpdating(true);
       setMessage(null);
 
       const response = await fetch('/api/users/delete', {
@@ -452,7 +441,7 @@ export default function SettingsPageClient() {
     } catch (error: any) {
       setMessage({ type: 'error', text: error.message || 'Failed to delete account' });
     } finally {
-      setIsLoading(false);
+      setIsUpdating(false);
     }
   };
 
@@ -681,10 +670,10 @@ export default function SettingsPageClient() {
                         <div className="flex justify-end">
                           <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isUpdating}
                             className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
                           >
-                            {isLoading ? (
+                            {isUpdating ? (
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             ) : (
                               <Save className="w-4 h-4" />
@@ -730,10 +719,10 @@ export default function SettingsPageClient() {
                             </div>
                             <button
                               type="submit"
-                              disabled={isLoading}
+                              disabled={isUpdating}
                               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
                             >
-                              {isLoading ? (
+                              {isUpdating ? (
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                               ) : (
                                 <Save className="w-4 h-4" />
@@ -787,10 +776,10 @@ export default function SettingsPageClient() {
                             </div>
                             <button
                               type="submit"
-                              disabled={isLoading}
+                              disabled={isUpdating}
                               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
                             >
-                              {isLoading ? (
+                              {isUpdating ? (
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                               ) : (
                                 <Key className="w-4 h-4" />
@@ -826,7 +815,7 @@ export default function SettingsPageClient() {
                               {connectedAccounts.some(acc => acc.provider === 'google') ? (
                                 <button
                                   onClick={() => handleUnlinkAccount('google')}
-                                  disabled={isLoading}
+                                  disabled={isUpdating}
                                   className="text-red-600 hover:text-red-800 disabled:text-gray-400 flex items-center space-x-2"
                                 >
                                   <Unlink className="w-4 h-4" />
@@ -835,7 +824,7 @@ export default function SettingsPageClient() {
                               ) : (
                                 <button
                                   onClick={() => handleLinkAccount('google')}
-                                  disabled={isLoading}
+                                  disabled={isUpdating}
                                   className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
                                 >
                                   <LinkIcon className="w-4 h-4" />
@@ -862,7 +851,7 @@ export default function SettingsPageClient() {
                               {connectedAccounts.some(acc => acc.provider === 'facebook') ? (
                                 <button
                                   onClick={() => handleUnlinkAccount('facebook')}
-                                  disabled={isLoading}
+                                  disabled={isUpdating}
                                   className="text-red-600 hover:text-red-800 disabled:text-gray-400 flex items-center space-x-2"
                                 >
                                   <Unlink className="w-4 h-4" />
@@ -871,7 +860,7 @@ export default function SettingsPageClient() {
                               ) : (
                                 <button
                                   onClick={() => handleLinkAccount('facebook')}
-                                  disabled={isLoading}
+                                  disabled={isUpdating}
                                   className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-4 py-2 rounded-lg transition-colors flex items-center space-x-2"
                                 >
                                   <LinkIcon className="w-4 h-4" />
@@ -893,10 +882,10 @@ export default function SettingsPageClient() {
                           </p>
                           <button
                             onClick={handleDeleteAccount}
-                            disabled={isLoading}
+                            disabled={isUpdating}
                             className="bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
                           >
-                            {isLoading ? (
+                            {isUpdating ? (
                               <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                             ) : (
                               <Trash2 className="w-4 h-4" />
@@ -1345,10 +1334,10 @@ export default function SettingsPageClient() {
                           <div className="flex justify-end">
                             <button
                               type="submit"
-                              disabled={isLoading || !pageData.name.trim()}
+                              disabled={isUpdating || !pageData.name.trim()}
                               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-2 rounded-lg transition-colors flex items-center space-x-2"
                             >
-                              {isLoading ? (
+                              {isUpdating ? (
                                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
                               ) : (
                                 <FileText className="w-4 h-4" />

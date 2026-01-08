@@ -20,7 +20,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ count: pendingRequestsCount });
   } catch (error) {
-    console.error('Error fetching friend requests count:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

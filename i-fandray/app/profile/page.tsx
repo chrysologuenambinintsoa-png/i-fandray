@@ -6,15 +6,17 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function ProfileRedirect() {
   const router = useRouter();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, isLoading } = useAuth();
 
   useEffect(() => {
+    if (isLoading) return; // Wait for authentication to load
+
     if (isAuthenticated && user?.username) {
       router.push(`/profile/${user.username}`);
     } else {
       router.push('/auth/login');
     }
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, isLoading, router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">

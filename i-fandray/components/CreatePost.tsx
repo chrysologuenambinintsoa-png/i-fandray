@@ -57,7 +57,8 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create post');
+        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+        throw new Error(errorData.error || `Failed to create post: ${response.statusText}`);
       }
 
       const newPost = await response.json();
@@ -77,7 +78,8 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
       toast.success('Post created successfully!');
     } catch (error) {
       console.error('Error creating post:', error);
-      toast.error('Failed to create post');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
+      toast.error(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -98,10 +100,12 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
         const response = await fetch('/api/upload', {
           method: 'POST',
           body: formData,
+          credentials: 'include',
         });
 
         if (!response.ok) {
-          throw new Error(`Upload failed: ${response.statusText}`);
+          const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+          throw new Error(errorData.error || `Upload failed: ${response.statusText}`);
         }
 
         const data = await response.json();
@@ -110,7 +114,8 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
         toast.success(`${file.name} uploaded successfully`);
       } catch (error) {
         console.error('Error uploading file:', error);
-        toast.error(`Failed to upload ${file.name}`);
+        const errorMessage = error instanceof Error ? error.message : `Failed to upload ${file.name}`;
+        toast.error(errorMessage);
         hasErrors = true;
       }
     }
@@ -307,6 +312,12 @@ export function CreatePost({ onPost, groupId }: CreatePostProps) {
               <p className="text-xs text-gray-500 mt-1">
                 Images (JPEG, PNG, GIF, WebP) and Videos (MP4, WebM) up to 10MB each
               </p>
+              {uploadError && (
+                <p className="text-sm text-red-600 flex items-center mt-2">
+                  <AlertCircle className="w-4 h-4 mr-1" />
+                  {uploadError}
+                </p>
+              )}
             </div>
 
             {/* Additional Fields */}

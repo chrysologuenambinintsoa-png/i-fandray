@@ -64,7 +64,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ friends: uniqueFriends });
   } catch (error) {
-    console.error('Error fetching online friends:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

@@ -4,33 +4,33 @@ import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Forgot password API called');
+    
 
     const body = await request.json();
-    console.log('Request body:', body);
+    
 
     const { email } = body;
 
     if (!email) {
-      console.log('Email missing');
+      
       return NextResponse.json(
         { error: 'Email is required' },
         { status: 400 }
       );
     }
 
-    console.log('Looking for user with email:', email);
+    
 
     // Find user by email
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
-    console.log('User found:', user ? 'yes' : 'no');
+    
 
     if (!user) {
       // Don't reveal if email exists or not for security
-      console.log('User not found, returning success message');
+      
       return NextResponse.json(
         { message: 'If an account with this email address exists, a password reset link has been sent.' },
         { status: 200 }
@@ -41,8 +41,8 @@ export async function POST(request: NextRequest) {
     const resetToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour from now
 
-    console.log('Generated reset token:', resetToken);
-    console.log('Expiry:', resetTokenExpiry);
+    
+    
 
     // Update user with reset token
     await prisma.user.update({
@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    console.log('User updated successfully');
+    
 
     // Create email transporter
     const transporter = nodemailer.createTransport({
@@ -87,14 +87,14 @@ export async function POST(request: NextRequest) {
       `,
     });
 
-    console.log('Reset email sent successfully');
+    
     return NextResponse.json(
       { message: 'If an account with this email address exists, a password reset link has been sent.' },
       { status: 200 }
     );
 
   } catch (error) {
-    console.error('Forgot password error:', error);
+    
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

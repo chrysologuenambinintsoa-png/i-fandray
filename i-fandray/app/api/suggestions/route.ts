@@ -83,7 +83,7 @@ export async function GET(_request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Suggestions API error:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

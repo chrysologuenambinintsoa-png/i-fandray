@@ -23,7 +23,7 @@ export async function GET(_request: NextRequest) {
 
     return NextResponse.json({ accounts });
   } catch (error) {
-    console.error('Error fetching connected accounts:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
     // This will be handled by the client-side signIn call
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error linking account:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -101,7 +101,7 @@ export async function DELETE(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Error unlinking account:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

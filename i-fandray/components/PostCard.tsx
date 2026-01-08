@@ -132,26 +132,44 @@ export function PostCard({
   }, [showComments, comments.length, fetchComments]);
 
   return (
-    <article className="card overflow-hidden mb-4">
-      {/* Post Header */}
+    <article className="card overflow-hidden mb-4 group relative transform transition-all duration-300 hover:scale-[1.01] hover:shadow-xl">
+      {/* Dynamic gradient border */}
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-green-500/20 to-teal-500/20 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 blur-sm"></div>
+
+      {/* Animated background elements */}
+      <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="w-2 h-2 bg-gradient-to-r from-blue-400 to-blue-600 rounded-full animate-pulse"></div>
+      </div>
+      <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
+        <div className="w-2 h-2 bg-gradient-to-r from-green-400 to-green-600 rounded-full animate-pulse"></div>
+      </div>
+
+      {/* Main content */}
+      <div className="relative">
       <div className="p-4 flex items-center justify-between">
         <div className="flex items-center space-x-3">
           {post.author?.avatar ? (
-            <img
-              src={post.author.avatar}
-              alt={post.author.username}
-              className="w-10 h-10 rounded-full object-cover"
-            />
+            <div className="relative">
+              <img
+                src={post.author.avatar}
+                alt={`${post.author.firstName} ${post.author.lastName}`}
+                className="w-10 h-10 rounded-full object-cover ring-2 ring-blue-500/30 group-hover:ring-blue-500/60 transition-all duration-300"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-md"></div>
+            </div>
           ) : (
-            <div className="w-10 h-10 bg-green-600 rounded-full flex items-center justify-center text-white font-semibold">
-              {post.author?.firstName?.[0] ?? 'U'}
+            <div className="relative">
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 via-green-500 to-teal-500 rounded-full flex items-center justify-center text-white font-semibold ring-2 ring-blue-500/30 group-hover:ring-blue-500/60 transition-all duration-300">
+                {post.author?.firstName?.[0] ?? 'U'}
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-green-400 rounded-full opacity-0 group-hover:opacity-20 transition-opacity duration-300 blur-md"></div>
             </div>
           )}
           <div>
-            <p className="font-semibold text-card-foreground">
+            <p className="font-semibold text-card-foreground group-hover:text-blue-600 transition-colors duration-300">
               {post.author?.firstName} {post.author?.lastName}
             </p>
-            <p className="text-sm text-muted-foreground">{formatDate(post.createdAt)}</p>
+            <p className="text-sm text-muted-foreground group-hover:text-green-600 transition-colors duration-300">{formatDate(post.createdAt)}</p>
           </div>
         </div>
         <div className="relative">
@@ -276,39 +294,41 @@ export function PostCard({
           onToggleReactions={handleLike}
         />
 
-        <div className="flex items-center justify-around mt-2">
+        <div className="flex items-center justify-around mt-4">
           <button
             onClick={handleLike}
             className={cn(
-              'flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 shadow-sm',
-              selectedReaction ? 'bg-white/10 text-blue-200' : 'bg-white/0 text-card-foreground/80'
+              'flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 shadow-lg border border-white/10',
+              selectedReaction
+                ? 'bg-gradient-to-r from-green-500/30 via-blue-500/30 to-teal-500/30 text-white backdrop-blur-sm ring-2 ring-green-500/50'
+                : 'bg-white/10 backdrop-blur-sm text-white/80 hover:bg-gradient-to-r hover:from-blue-500/20 hover:via-green-500/20 hover:to-teal-500/20 hover:text-white'
             )}
           >
             {selectedReaction ? (
-              <span className="text-lg">{selectedReaction}</span>
+              <span className="text-lg animate-bounce">{selectedReaction}</span>
             ) : (
-              <ThumbsUp className="w-5 h-5" />
+              <ThumbsUp className="w-5 h-5 group-hover:text-blue-300 transition-colors duration-300" />
             )}
-            <span className="text-sm font-medium">
+            <span className="text-sm font-semibold">
               {selectedReaction ? t('post.reacted') : t('post.like')}
             </span>
           </button>
 
           <button
             onClick={handleComment}
-            className="flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 text-card-foreground/80"
+            className="flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 bg-white/10 backdrop-blur-sm text-white/80 hover:bg-gradient-to-r hover:from-green-500/20 hover:via-teal-500/20 hover:to-blue-500/20 hover:text-white shadow-lg hover:shadow-xl border border-white/10"
           >
-            <MessageCircle className="w-5 h-5" />
-            <span className="text-sm font-medium">Comment</span>
+            <MessageCircle className="w-5 h-5 group-hover:text-green-300 transition-colors duration-300" />
+            <span className="text-sm font-semibold">Comment</span>
           </button>
 
           <div className="relative">
             <button
               onClick={() => setShowShareOptions(!showShareOptions)}
-              className="flex items-center space-x-2 px-4 py-2 rounded-full transition-transform transform hover:scale-105 text-card-foreground/80"
+              className="flex items-center space-x-2 px-6 py-3 rounded-full transition-all duration-300 transform hover:scale-110 bg-white/10 backdrop-blur-sm text-white/80 hover:bg-gradient-to-r hover:from-teal-500/20 hover:via-blue-500/20 hover:to-indigo-500/20 hover:text-white shadow-lg hover:shadow-xl border border-white/10"
             >
-              <Share2 className="w-5 h-5" />
-              <span className="text-sm font-medium">Share</span>
+              <Share2 className="w-5 h-5 group-hover:text-teal-300 transition-colors duration-300" />
+              <span className="text-sm font-semibold">Share</span>
             </button>
             {showShareOptions && (
               <div className="absolute left-1/2 transform -translate-x-1/2 mt-1 w-48 card py-1 z-50">
@@ -340,6 +360,7 @@ export function PostCard({
           </div>
         )}
       </div>
+    </div>
     </article>
   );
 }

@@ -65,6 +65,9 @@
     "views": "vues",
     "likes": "J'aime",
     "comments": "commentaires",
+    "creatpost": "créer une publication",
+    "createPost": "Créer une publication",
+    "whatsOnMind": "Quoi de neuf ?",
     "shares": "partages",
     "feeling": "Humeur",
     "location": "Lieu",
@@ -131,6 +134,26 @@
   },
   "splash": {
     "tagline": "Connectez-vous, Partagez, Découvrez"
+  },
+  "welcome": {
+    "addFriends": "Ajoutez des amis",
+    "addFriendsDesc": "Trouvez des personnes que vous connaissez et commencez à suivre leurs activités.",
+    "viewFriends": "Voir les amis",
+    "createFirstPost": "Créez votre première publication",
+    "createFirstPostDesc": "Partagez ce que vous faites avec vos amis.",
+    "createPost": "Créer une publication",
+    "joinGroups": "Rejoindre des groupes",
+    "joinGroupsDesc": "Découvrez et rejoignez des groupes qui vous intéressent.",
+    "exploreGroups": "Explorer les groupes",
+    "customizeProfile": "Personnaliser le profil",
+    "customizeProfileDesc": "Personnalisez votre profil pour mieux vous présenter.",
+    "myProfile": "Mon profil",
+    "closeTips": "Fermer les conseils"
+  },
+  "story": {
+    "createStory": "Créer une story",
+    "yourStory": "Votre story",
+    "viewStories": "Voir les stories"
   },
   "feed": {
     "welcome": "Bienvenue sur votre fil d'actualité",

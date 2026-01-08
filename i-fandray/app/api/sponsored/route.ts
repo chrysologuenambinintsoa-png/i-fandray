@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ message: 'Sponsored content creation not implemented' });
   } catch (error) {
-    console.error('Error creating sponsored content:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -63,7 +63,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json([]);
   } catch (error) {
-    console.error('Error fetching sponsored content:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

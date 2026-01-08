@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
+import { getToken } from 'next-auth/jwt';
 import { prisma } from '@/lib/prisma';
 import { authOptions } from '@/lib/auth';
 
@@ -120,7 +121,38 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    let session = await getServerSession(authOptions);
+
+    // Fallbacks: try getToken then prisma session lookup if needed
+    if (!session?.user?.id) {
+      try {
+        const token = await getToken({ req: request as any, secret: process.env.NEXTAUTH_SECRET });
+        if (token) {
+          // @ts-ignore
+          session = { user: { id: token.id || token.sub } } as any;
+          console.debug('[posts] session recovered from token:', !!session?.user?.id);
+        }
+      } catch (tokErr) {
+        console.debug('[posts] getToken fallback failed:', tokErr);
+      }
+
+      if (!session?.user?.id) {
+        try {
+          const cookieVal = request.cookies.get('next-auth.session-token')?.value;
+          console.debug('[posts] session cookie present for prisma lookup:', !!cookieVal);
+          if (cookieVal) {
+            const sessionRecord = await prisma.session.findUnique({ where: { sessionToken: cookieVal } });
+            if (sessionRecord?.userId) {
+              session = { user: { id: sessionRecord.userId } } as any;
+              console.debug('[posts] session recovered from prisma.Session userId:', sessionRecord.userId);
+            }
+          }
+        } catch (dbErr) {
+          console.debug('[posts] prisma session lookup failed:', dbErr);
+        }
+      }
+    }
+
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }

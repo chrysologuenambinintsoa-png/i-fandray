@@ -74,11 +74,27 @@ export default function MessagesPage() {
     setIsVoiceCallActive(false);
   };
 
-  useEffect(() => {
-    if (user) {
-      fetchConversations();
+  const fetchMessages = async (conversationId: string) => {
+    try {
+      const response = await fetch(`/api/conversations/${conversationId}/messages`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+      const data = await response.json();
+      setMessages(data.messages || []);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+      toast.error('Failed to load messages');
     }
-  }, [user]);
+  };
+
+  useEffect(() => {
+    if (selectedConversation) {
+      fetchMessages(selectedConversation.id);
+    } else {
+      setMessages([]);
+    }
+  }, [selectedConversation]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

@@ -131,7 +131,7 @@ export const authOptions: NextAuthOptions = {
             username: user.username,
           };
         } catch (error) {
-          console.error('Credentials authorization error:', error);
+          // Credentials authorization error
           throw error;
         }
       },
@@ -144,37 +144,30 @@ export const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async signIn({ user, account, profile }) {
-      console.log('🔐 SignIn callback triggered:', {
-        provider: account?.provider,
-        email: user?.email,
-        hasProfile: !!profile,
-        accountType: account?.type,
-        error: account?.error,
-        timestamp: new Date().toISOString()
-      });
+      // SignIn callback triggered
 
       // For OAuth providers, ensure user data is properly formatted
       if (account?.provider === 'google' || account?.provider === 'facebook') {
         // For Facebook, email might not be available, so we allow sign in anyway
         if (account.provider === 'facebook' && !user.email) {
-          console.log('⚠️ Facebook login without email - allowing sign in with generated email');
+          // Facebook login without email - allowing sign in with generated email
           // Generate a temporary email using Facebook ID
           user.email = `facebook-${account.providerAccountId}@temp.local`;
         } else if (!user.email) {
-          console.error('❌ OAuth user has no email for provider:', account.provider);
+          // OAuth user has no email for provider
           return false;
         }
 
         // Ensure we have firstName and lastName
         if (!user.firstName || !user.lastName) {
-          const nameParts = user.name?.split(' ') || [];
-          user.firstName = user.firstName || nameParts[0] || '';
-          user.lastName = user.lastName || nameParts.slice(1).join(' ') || '';
+          const nameParts = user.name?.split(' ') ?? [];
+          user.firstName = user.firstName ?? nameParts[0] ?? '';
+          user.lastName = user.lastName ?? nameParts.slice(1).join(' ') ?? '';
         }
 
         // Generate unique username if not provided or if it already exists
         if (!user.username) {
-          const baseUsername = user.email?.split('@')[0] || user.name?.toLowerCase().replace(/\s+/g, '') || 'user';
+          const baseUsername = user.email?.split('@')[0] ?? user.name?.toLowerCase().replace(/\s+/g, '') ?? 'user';
           user.username = baseUsername;
         }
 
@@ -190,7 +183,7 @@ export const authOptions: NextAuthOptions = {
             username = `${user.username}${counter}`;
             counter++;
           } catch (error) {
-            console.error('Error checking username uniqueness:', error);
+            // Error checking username uniqueness
             // If we can't check, use a timestamp-based username
             username = `${user.username}_${Date.now()}`;
             break;
@@ -198,12 +191,7 @@ export const authOptions: NextAuthOptions = {
         }
         user.username = username;
 
-        console.log('✅ OAuth user data prepared:', {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          username: user.username
-        });
+        // OAuth user data prepared
 
         return true;
       }

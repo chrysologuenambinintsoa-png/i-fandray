@@ -23,7 +23,8 @@ function ClientOnly({ children, fallback = 'N/A' }: { children: () => string; fa
 export default function AuthErrorPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const error = searchParams.get('error');
+  const rawError = searchParams.get('error');
+  const error = rawError === 'undefined' ? null : rawError;
 
   const getErrorMessage = (error: string | null) => {
     switch (error) {

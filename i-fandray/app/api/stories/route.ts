@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json(stories);
   } catch (error) {
-    console.error('Error fetching stories:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(story, { status: 201 });
   } catch (error) {
-    console.error('Error creating story:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

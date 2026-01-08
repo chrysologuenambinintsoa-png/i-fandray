@@ -31,7 +31,7 @@ export async function GET(_request: NextRequest) {
       keyVersion: encryptionKey.keyVersion,
     });
   } catch (error) {
-    console.error('Erreur lors de la récupération de la clé:', error);
+    
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -71,7 +71,7 @@ export async function POST(request: NextRequest) {
       keyVersion: newKey.keyVersion,
     });
   } catch (error) {
-    console.error('Erreur lors de la création de la clé:', error);
+    
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }
@@ -124,7 +124,7 @@ export async function PUT(request: NextRequest) {
       keyVersion: newKey.keyVersion,
     });
   } catch (error) {
-    console.error('Erreur lors de la rotation de la clé:', error);
+    
     return NextResponse.json({ error: 'Erreur serveur' }, { status: 500 });
   }
 }

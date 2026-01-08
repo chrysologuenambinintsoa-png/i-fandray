@@ -75,7 +75,7 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error('Error fetching groups:', error);
+    
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
@@ -83,13 +83,13 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    console.log('Session:', session);
+    
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await request.json();
-    console.log('Body:', body);
+    
     const { name, description, avatar, coverPhoto, privacy, rules, category } = body;
 
     if (!name) {
@@ -141,7 +141,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(group, { status: 201 });
   } catch (error) {
-    console.error('Error creating group:', error);
+    
     return NextResponse.json({ error: 'Failed to create group', details: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
